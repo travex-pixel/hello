@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { MODE_COPY } from "@/lib/matching";
 
-export const metadata = { title: "How HELLO works" };
+export const metadata = { title: "How it works" };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (

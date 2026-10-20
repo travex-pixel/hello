@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/shell/AppShell";
+import { SHARE_DESCRIPTION, SHARE_TITLE } from "@/lib/og/brand";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,12 +14,38 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/**
+ * Share previews need absolute URLs. On Vercel, use the stable production
+ * domain so every shared link (including previews) shows the same card.
+ * NEXT_PUBLIC_SITE_URL overrides it, for example after adding a custom domain.
+ */
+function siteUrl(): URL {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL;
+  if (explicit) return new URL(explicit);
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+  if (vercel) return new URL(`https://${vercel}`);
+  return new URL("http://localhost:3000");
+}
+
 export const metadata: Metadata = {
-  title: "HELLO — Meet someone interesting. In one tap.",
-  description:
-    "Tap one button and start a spontaneous conversation. The demo pairs you with clearly labelled AI characters, no account required.",
+  metadataBase: siteUrl(),
+  title: { default: SHARE_TITLE, template: "%s · HELLO" },
+  description: SHARE_DESCRIPTION,
   applicationName: "HELLO",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "HELLO" },
+  openGraph: {
+    type: "website",
+    siteName: "HELLO",
+    title: SHARE_TITLE,
+    description: SHARE_DESCRIPTION,
+    url: "/",
+    locale: "en",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SHARE_TITLE,
+    description: SHARE_DESCRIPTION,
+  },
 };
 
 export const viewport: Viewport = {
