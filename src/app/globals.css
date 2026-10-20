@@ -1,62 +1,74 @@
 @import "tailwindcss";
 
 /*
-  HELLO design tokens.
-  One dark theme, warm rather than cold: deep midnight surfaces, soft white
-  type, a single violet-blue signal colour used sparingly for the one thing
-  that matters on each screen.
+  hello design tokens.
+  Warm paper, deep charcoal, one vermilion for the thing that matters on a
+  screen, cobalt for the person's own voice, a touch of mint for "available".
+  Light only: the product is a warm daytime object, not a dashboard.
 */
 @theme {
-  --color-bg: #0a0c14;
-  --color-bg-elevated: #0f121c;
-  --color-surface: #141827;
-  --color-surface-2: #1a1f30;
-  --color-surface-3: #222842;
-  --color-line: rgba(255, 255, 255, 0.08);
-  --color-line-strong: rgba(255, 255, 255, 0.14);
+  --color-bg: #fbf7f0;
+  --color-bg-elevated: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f3ede3;
+  --color-surface-3: #e9e1d4;
+  --color-line: rgba(28, 25, 20, 0.1);
+  --color-line-strong: rgba(28, 25, 20, 0.2);
 
-  --color-ink: #f3f4f8;
-  --color-ink-2: #a9aec0;
-  --color-ink-3: #6f7489;
-  --color-ink-inverse: #0a0c14;
+  --color-ink: #1b1917;
+  --color-ink-2: #5a554e;
+  --color-ink-3: #736c62;
+  --color-ink-inverse: #fbf7f0;
 
-  --color-accent: #6f7cff;
-  --color-accent-strong: #8d98ff;
-  --color-accent-deep: #4b58e6;
-  --color-accent-soft: rgba(111, 124, 255, 0.14);
-  --color-accent-glow: rgba(111, 124, 255, 0.45);
+  --color-accent: #c93a18;
+  --color-accent-strong: #b9341a;
+  --color-accent-deep: #a62c12;
+  --color-accent-soft: #fce6de;
+  --color-coral: #f2552c;
+  --color-coral-light: #ff8a66;
+  --color-accent-glow: rgba(242, 85, 44, 0.45);
 
-  --color-success: #5bd58c;
-  --color-warning: #f2b64a;
-  --color-danger: #f2706f;
+  --color-cobalt: #1e3fd9;
+  --color-cobalt-deep: #1734b0;
+  --color-cobalt-soft: #e4e9fb;
+
+  --color-mint: #cdefd9;
+  --color-mint-ink: #176b42;
+
+  --color-success: #1d7a4c;
+  --color-warning: #9a6412;
+  --color-danger: #c9321f;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
   --radius-xs: 8px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
   --radius-xl: 28px;
 
-  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 30px -16px rgba(0, 0, 0, 0.7);
-  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 50px -24px rgba(0, 0, 0, 0.8);
-  --shadow-glow: 0 0 0 1px rgba(111, 124, 255, 0.22), 0 24px 70px -24px rgba(111, 124, 255, 0.55);
+  --shadow-soft: 0 1px 2px rgba(28, 25, 20, 0.06), 0 10px 30px -18px rgba(28, 25, 20, 0.35);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 1px 2px rgba(28, 25, 20, 0.05), 0 24px 60px -32px rgba(28, 25, 20, 0.4);
+  --shadow-sheet: 0 -8px 40px -16px rgba(28, 25, 20, 0.35);
+  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 10px 24px -14px rgba(201, 58, 24, 0.75);
+  --shadow-orb: 0 2px 0 rgba(255, 255, 255, 0.35) inset, 0 -10px 30px rgba(166, 44, 18, 0.35) inset, 0 30px 70px -28px rgba(242, 85, 44, 0.75);
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
 
-  --animate-pulse-soft: pulse-soft 3.6s ease-in-out infinite;
+  --animate-breathe: breathe 4.2s ease-in-out infinite;
   --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
 
-  @keyframes pulse-soft {
+  @keyframes breathe {
     0%,
     100% {
       opacity: 0.55;
-      transform: scale(1);
+      transform: scale(0.96);
     }
     50% {
-      opacity: 1;
+      opacity: 0.9;
       transform: scale(1.04);
     }
   }
@@ -75,7 +87,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --nav-height: 64px;
@@ -99,28 +111,36 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* Ambient background: one quiet, warm light source behind the hero. */
+/* Editorial headlines: a soft optical-size serif with tight tracking. */
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 60, "opsz" 72;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+
+/* One quiet, warm light source. Fixed so it never shifts under content. */
 .ambient {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(60% 45% at 50% 32%, rgba(111, 124, 255, 0.16), transparent 70%),
-    radial-gradient(40% 30% at 20% 90%, rgba(141, 152, 255, 0.06), transparent 70%);
+    radial-gradient(55% 40% at 50% 28%, rgba(242, 85, 44, 0.14), transparent 70%),
+    radial-gradient(35% 28% at 15% 95%, rgba(30, 63, 217, 0.06), transparent 70%);
 }
 
 *:focus {
   outline: none;
 }
 *:focus-visible {
-  outline: 2px solid var(--color-accent-strong);
+  outline: 2px solid var(--color-cobalt);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
 
 ::selection {
-  background: rgba(111, 124, 255, 0.35);
+  background: rgba(242, 85, 44, 0.22);
 }
 
 textarea,
@@ -128,7 +148,6 @@ input {
   font: inherit;
 }
 
-/* Hide scrollbars in horizontal chip rows without losing scrollability. */
 .scrollbar-none {
   scrollbar-width: none;
 }
@@ -136,7 +155,6 @@ input {
   display: none;
 }
 
-/* Text balance for headlines. */
 .text-balance {
   text-wrap: balance;
 }

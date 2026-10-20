@@ -1,7 +1,7 @@
 export function TypingIndicator({ name }: { name: string }) {
   return (
     <div className="flex items-start" role="status" aria-label={`${name} is typing`}>
-      <div className="flex h-10 items-center gap-1 rounded-[18px] rounded-bl-[6px] bg-surface-2 px-4">
+      <div className="flex h-10 items-center gap-1 rounded-[18px] rounded-bl-[6px] bg-surface px-4 shadow-soft">
         {[0, 1, 2].map((i) => (
           <span
             key={i}

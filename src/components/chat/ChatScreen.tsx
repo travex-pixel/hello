@@ -60,7 +60,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
   if (!conversation || !character) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-        <h1 className="text-xl font-semibold text-ink">This chat isn&rsquo;t here</h1>
+        <h1 className="display text-[26px] text-ink">This chat isn&rsquo;t here</h1>
         <p className="text-sm text-ink-2">It may have been cleared from this device.</p>
         <Button variant="secondary" onClick={() => router.push("/")}>
           Back to Discover
@@ -102,7 +102,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex w-full max-w-md flex-col bg-bg">
-      <header className="flex items-center gap-2 border-b border-line bg-bg/90 px-2 pb-2 pt-[calc(var(--safe-top)+8px)] backdrop-blur-md">
+      <header className="flex items-center gap-2 border-b border-line bg-bg/92 px-2 pb-2 pt-[calc(var(--safe-top)+8px)] backdrop-blur-md">
         <IconButton label="Back" onClick={goBack}>
           <ArrowLeft className="size-5" />
         </IconButton>

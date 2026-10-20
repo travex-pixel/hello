@@ -17,13 +17,13 @@ export default function OpenGraphImage() {
           height: "100%",
           display: "flex",
           position: "relative",
-          background: BRAND.bg,
+          background: BRAND.paper,
           fontFamily: "Geist",
           color: BRAND.ink,
           overflow: "hidden",
         }}
       >
-        {/* Ambient light behind the orb. Kept inside the frame: the renderer cuts off gradients that overflow it. */}
+        {/* Warm light behind the button, kept inside the frame. */}
         <div
           style={{
             position: "absolute",
@@ -31,21 +31,21 @@ export default function OpenGraphImage() {
             top: 0,
             width: 1200,
             height: 630,
-            background: "radial-gradient(ellipse 760px 560px at 950px 315px, rgba(111,124,255,0.26) 0%, rgba(111,124,255,0.08) 45%, rgba(10,12,20,0) 75%)",
+            background: "radial-gradient(ellipse 700px 540px at 930px 315px, rgba(242,85,44,0.22) 0%, rgba(242,85,44,0.07) 45%, rgba(251,247,240,0) 75%)",
           }}
         />
 
-        {/* Left column: message */}
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "64px 0 60px 76px", width: 700 }}>
-          <div style={{ display: "flex", fontSize: 30, fontWeight: 600, letterSpacing: 10 }}>HELLO</div>
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "60px 0 56px 76px", width: 690 }}>
+          <div style={{ display: "flex", fontFamily: "Fraunces", fontSize: 44, letterSpacing: -1 }}>
+            hello<span style={{ color: BRAND.accent }}>.</span>
+          </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", flexDirection: "column", fontSize: 76, fontWeight: 600, lineHeight: 1.04, letterSpacing: -2.5 }}>
-              <span>Meet someone</span>
-              <span>interesting.</span>
-              <span style={{ color: BRAND.accentStrong }}>In one tap.</span>
+            <div style={{ display: "flex", flexDirection: "column", fontFamily: "Fraunces", fontSize: 88, lineHeight: 0.98, letterSpacing: -3 }}>
+              <span>Meet someone new.</span>
+              <span style={{ color: BRAND.accent }}>In one tap.</span>
             </div>
-            <div style={{ display: "flex", marginTop: 34, gap: 12 }}>
+            <div style={{ display: "flex", marginTop: 36, gap: 12 }}>
               {MODES.map((m, i) => (
                 <div
                   key={m}
@@ -54,9 +54,9 @@ export default function OpenGraphImage() {
                     padding: "12px 22px",
                     borderRadius: 999,
                     fontSize: 25,
-                    fontWeight: 500,
-                    border: `1.5px solid ${i === 0 ? "rgba(141,152,255,0.6)" : BRAND.line}`,
-                    background: i === 0 ? "rgba(111,124,255,0.18)" : "rgba(255,255,255,0.04)",
+                    fontWeight: 600,
+                    background: i === 0 ? BRAND.surface : "rgba(255,255,255,0.5)",
+                    border: `1.5px solid ${i === 0 ? "rgba(28,25,20,0.2)" : BRAND.line}`,
                     color: i === 0 ? BRAND.ink : BRAND.ink2,
                   }}
                 >
@@ -67,35 +67,17 @@ export default function OpenGraphImage() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", fontSize: 24, fontWeight: 500, color: BRAND.ink3 }}>
-            <div style={{ width: 11, height: 11, borderRadius: 999, background: "#5bd58c", marginRight: 14 }} />
+            <div style={{ width: 11, height: 11, borderRadius: 999, background: BRAND.mintInk, marginRight: 14 }} />
             Try the AI demo now. No sign-up.
           </div>
         </div>
 
-        {/* Right column: the signature button */}
         <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "center", position: "relative" }}>
-          {/* Glow as a gradient: large blurred shadows get clipped into a visible rectangle by the renderer. */}
-          <div
-            style={{
-              position: "absolute",
-              width: 640,
-              height: 640,
-              borderRadius: 9999,
-              background: "radial-gradient(circle, rgba(111,124,255,0.55) 0%, rgba(111,124,255,0.22) 34%, rgba(111,124,255,0) 62%)",
-            }}
-          />
           {[540, 450].map((d, i) => (
-            <div
-              key={d}
-              style={{
-                position: "absolute",
-                width: d,
-                height: d,
-                borderRadius: 9999,
-                border: `2px solid rgba(141,152,255,${i === 0 ? 0.14 : 0.26})`,
-              }}
-            />
+            <div key={d} style={{ position: "absolute", width: d, height: d, borderRadius: 9999, border: `2px solid rgba(242,85,44,${i === 0 ? 0.14 : 0.26})` }} />
           ))}
+          {/* Speech-bubble tail */}
+          <div style={{ position: "absolute", left: 104, top: 428, width: 60, height: 60, borderRadius: 10, background: "#cf3d1b", transform: "rotate(45deg)" }} />
           <div
             style={{
               display: "flex",
@@ -105,7 +87,6 @@ export default function OpenGraphImage() {
               height: 360,
               borderRadius: 9999,
               background: ORB_BACKGROUND,
-              border: "2px solid rgba(141,152,255,0.55)",
             }}
           >
             <div
@@ -113,10 +94,10 @@ export default function OpenGraphImage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: 336,
-                height: 336,
+                width: 338,
+                height: 338,
                 borderRadius: 9999,
-                border: "1.5px solid rgba(255,255,255,0.18)",
+                border: "1.5px solid rgba(255,255,255,0.3)",
                 fontSize: 30,
                 fontWeight: 600,
                 letterSpacing: 7,

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/shell/AppShell";
 import { SHARE_DESCRIPTION, SHARE_TITLE } from "@/lib/og/brand";
@@ -14,6 +14,14 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+/** Display serif for headlines and the wordmark. Variable, so one file covers every weight. */
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["SOFT", "opsz"],
+  display: "swap",
 });
 
 /**
@@ -31,13 +39,13 @@ function siteUrl(): URL {
 
 export const metadata: Metadata = {
   metadataBase: siteUrl(),
-  title: { default: SHARE_TITLE, template: "%s · HELLO" },
+  title: { default: SHARE_TITLE, template: "%s · hello" },
   description: SHARE_DESCRIPTION,
-  applicationName: "HELLO",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "HELLO" },
+  applicationName: "hello",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "hello" },
   openGraph: {
     type: "website",
-    siteName: "HELLO",
+    siteName: "hello",
     title: SHARE_TITLE,
     description: SHARE_DESCRIPTION,
     url: "/",
@@ -51,7 +59,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0c14",
+  themeColor: "#fbf7f0",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -60,7 +68,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <div className="ambient" aria-hidden="true" />
         <AppShell>{children}</AppShell>

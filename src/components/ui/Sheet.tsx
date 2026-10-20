@@ -45,7 +45,7 @@ export function Sheet({ open, onClose, title, children, dismissable = true, clas
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <motion.div
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-ink/45"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -64,13 +64,14 @@ export function Sheet({ open, onClose, title, children, dismissable = true, clas
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 40 }}
             transition={{ duration: reduce ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-              "relative w-full max-w-md rounded-t-xl border border-line bg-bg-elevated p-5 pb-[calc(20px+var(--safe-bottom))] shadow-card outline-none sm:rounded-xl sm:pb-5",
+              "relative w-full max-w-md rounded-t-xl bg-surface p-5 pb-[calc(20px+var(--safe-bottom))] shadow-sheet outline-none sm:rounded-xl sm:pb-5",
               className,
             )}
           >
+            <div aria-hidden="true" className="mx-auto mb-3 h-1 w-10 rounded-full bg-surface-3 sm:hidden" />
             {(title || dismissable) && (
               <div className="mb-3 flex items-center justify-between gap-3">
-                {title ? <h2 className="text-lg font-semibold tracking-tight text-ink">{title}</h2> : <span />}
+                {title ? <h2 className="display text-[22px] text-ink">{title}</h2> : <span />}
                 {dismissable && (
                   <IconButton label="Close" onClick={onClose} className="-mr-2">
                     <X className="size-5" />

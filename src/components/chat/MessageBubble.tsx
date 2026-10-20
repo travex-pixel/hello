@@ -27,7 +27,7 @@ export function MessageBubble({ message, onRetry }: Props) {
       <div
         className={cn(
           "max-w-[82%] whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2.5 text-[15px] leading-relaxed",
-          mine ? "rounded-br-[6px] bg-accent text-white" : "rounded-bl-[6px] bg-surface-2 text-ink",
+          mine ? "rounded-br-[6px] bg-cobalt text-white" : "rounded-bl-[6px] bg-surface text-ink shadow-soft",
           message.status === "failed" && "opacity-70",
         )}
       >

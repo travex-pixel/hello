@@ -8,28 +8,30 @@ interface AvatarProps {
 }
 
 const SIZE = {
-  sm: "size-9 text-sm",
-  md: "size-12 text-lg",
-  lg: "size-20 text-3xl",
-  xl: "size-24 text-4xl",
+  sm: "size-9 text-[17px]",
+  md: "size-12 text-[22px]",
+  lg: "size-20 text-[38px]",
+  xl: "size-24 text-[44px]",
 };
 
 /**
- * Characters have no photos on purpose: a letter on a tinted field reads as
- * an illustration, not a person, which keeps the AI demo honest at a glance.
+ * One art direction for every character: a soft tinted disc with a serif
+ * initial. It reads as an illustration, never a photo of a person, which
+ * keeps the AI demo honest at a glance.
  */
 export function Avatar({ name, hue, size = "md", className }: AvatarProps) {
-  const initial = name.trim().charAt(0).toUpperCase();
+  const initial = name.trim().charAt(0).toLowerCase();
   return (
     <div
       aria-hidden="true"
-      className={cn("relative inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white select-none", SIZE[size], className)}
+      className={cn("display relative inline-flex shrink-0 items-center justify-center rounded-full select-none", SIZE[size], className)}
       style={{
-        background: `radial-gradient(120% 120% at 30% 20%, hsl(${hue} 85% 72%) 0%, hsl(${hue} 60% 48%) 55%, hsl(${(hue + 30) % 360} 55% 32%) 100%)`,
-        boxShadow: `0 1px 0 rgba(255,255,255,0.18) inset, 0 10px 30px -14px hsl(${hue} 80% 55% / 0.8)`,
+        background: `hsl(${hue} 72% 86%)`,
+        color: `hsl(${hue} 45% 26%)`,
+        boxShadow: `0 1px 0 rgba(255,255,255,0.6) inset, 0 0 0 1px hsl(${hue} 40% 70% / 0.5)`,
       }}
     >
-      <span className="translate-y-px">{initial}</span>
+      <span className="-translate-y-[0.06em]">{initial}</span>
     </div>
   );
 }

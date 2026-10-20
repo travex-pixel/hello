@@ -18,7 +18,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
   return (
     <div>
       <p className="mb-2 text-sm font-medium text-ink">{label}</p>
-      <div role="radiogroup" aria-label={label} className="flex rounded-md border border-line bg-surface p-1">
+      <div role="radiogroup" aria-label={label} className="flex rounded-full bg-surface-2 p-1">
         {options.map((o) => (
           <button
             key={o.value}
@@ -27,8 +27,8 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
             aria-checked={o.value === value}
             onClick={() => onChange(o.value)}
             className={cn(
-              "h-10 flex-1 rounded-sm text-sm font-medium transition-colors",
-              o.value === value ? "bg-surface-3 text-ink" : "text-ink-2 hover:text-ink",
+              "h-10 flex-1 rounded-full text-sm font-semibold transition-all",
+              o.value === value ? "bg-surface text-ink shadow-soft" : "text-ink-2 hover:text-ink",
             )}
           >
             {o.label}
@@ -41,8 +41,8 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
 
 function Card({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-xl border border-line bg-surface p-4", className)}>
-      <h2 className="text-base font-semibold tracking-tight text-ink">{title}</h2>
+    <section className={cn("rounded-xl bg-surface p-4 shadow-card", className)}>
+      <h2 className="display text-[22px] text-ink">{title}</h2>
       <div className="mt-3 flex flex-col gap-4">{children}</div>
     </section>
   );
@@ -66,7 +66,7 @@ export function ProfileScreen() {
   return (
     <div className="flex flex-1 flex-col gap-4 px-5 pb-6 pt-[calc(var(--safe-top)+14px)]">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">Profile</h1>
+        <h1 className="display text-[34px] text-ink">Profile</h1>
         <p className="mt-1 text-sm text-ink-3">Everything here is optional and stays on this device.</p>
       </div>
 
@@ -85,7 +85,7 @@ export function ProfileScreen() {
                 value={preferences.displayName ?? ""}
                 onChange={(e) => setPreferences({ displayName: e.target.value.trim() ? e.target.value : undefined })}
                 placeholder="First name or nickname"
-                className="h-12 w-full rounded-md border border-line bg-bg px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-accent/60"
+                className="h-12 w-full rounded-md border border-line-strong bg-bg px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-cobalt"
               />
             </div>
             <div>
@@ -127,7 +127,7 @@ export function ProfileScreen() {
               Right now HELLO pairs you with clearly labelled AI characters so you can try it instantly. Real-people mode is invite-only, and nobody
               is ever swapped for an AI without telling you.
             </p>
-            <Link href="/people" className="flex items-center justify-between rounded-md border border-line bg-surface-2 px-4 py-3 text-sm font-medium text-ink transition-colors hover:bg-surface-3">
+            <Link href="/people" className="flex items-center justify-between rounded-md bg-surface-2 px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface-3">
               See how real-people mode works
               <ChevronRight className="size-4 text-ink-3" aria-hidden="true" />
             </Link>
@@ -155,7 +155,7 @@ export function ProfileScreen() {
             <Button variant="danger" block onClick={() => setConfirmClear(true)}>
               Clear demo history
             </Button>
-            <Link href="/how-it-works" className="flex items-center justify-between rounded-md border border-line bg-surface-2 px-4 py-3 text-sm font-medium text-ink transition-colors hover:bg-surface-3">
+            <Link href="/how-it-works" className="flex items-center justify-between rounded-md bg-surface-2 px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface-3">
               How HELLO works
               <ChevronRight className="size-4 text-ink-3" aria-hidden="true" />
             </Link>

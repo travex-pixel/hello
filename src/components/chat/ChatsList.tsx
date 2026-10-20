@@ -20,13 +20,13 @@ export function ChatsList() {
 
   return (
     <div className="flex flex-1 flex-col px-5 pt-[calc(var(--safe-top)+14px)]">
-      <h1 className="text-2xl font-semibold tracking-tight text-ink">Chats</h1>
+      <h1 className="display text-[34px] text-ink">Chats</h1>
       <p className="mt-1 text-sm text-ink-3">Stored on this device only.</p>
 
       {!hydrated ? null : items.length === 0 ? (
         <div className="mt-10 flex flex-1 flex-col items-center justify-start text-center">
-          <div className="rounded-xl border border-line bg-surface p-6">
-            <h2 className="text-lg font-semibold text-ink">No conversations yet</h2>
+          <div className="w-full rounded-xl bg-surface p-6 shadow-card">
+            <h2 className="display text-[26px] text-ink">No conversations yet</h2>
             <p className="mt-2 text-sm leading-relaxed text-ink-2">Tap the button on Discover and someone will be here within seconds.</p>
             <Button className="mt-4" block onClick={() => router.push("/")}>
               Find someone to talk to
@@ -43,7 +43,7 @@ export function ChatsList() {
               <li key={c.id}>
                 <Link
                   href={`/chat/${c.id}`}
-                  className="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-surface active:bg-surface-2"
+                  className="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-surface-2 active:bg-surface-3"
                 >
                   <Avatar name={character.name} hue={character.hue} size="md" />
                   <div className="min-w-0 flex-1">

@@ -16,7 +16,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/85 pb-[var(--safe-bottom)] backdrop-blur-md sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:rounded-t-2xl sm:border-x"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/90 pb-[var(--safe-bottom)] backdrop-blur-md sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:rounded-t-2xl sm:border-x"
     >
       <ul className="mx-auto flex h-[var(--nav-height)] max-w-md items-stretch justify-around px-2">
         {TABS.map(({ href, label, icon: Icon, match }) => {
@@ -31,7 +31,7 @@ export function BottomNav() {
                   active ? "text-ink" : "text-ink-3 hover:text-ink-2",
                 )}
               >
-                <Icon className={cn("size-[22px]", active && "text-accent-strong")} strokeWidth={active ? 2.2 : 1.8} aria-hidden="true" />
+                <Icon className={cn("size-[22px]", active && "text-accent")} strokeWidth={active ? 2.2 : 1.8} aria-hidden="true" />
                 {label}
               </Link>
             </li>

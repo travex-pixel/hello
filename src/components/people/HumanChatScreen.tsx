@@ -84,17 +84,17 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex w-full max-w-md flex-col bg-bg">
-      <header className="flex items-center gap-2 border-b border-line bg-bg/90 px-2 pb-2 pt-[calc(var(--safe-top)+8px)] backdrop-blur-md">
+      <header className="flex items-center gap-2 border-b border-line bg-bg/92 px-2 pb-2 pt-[calc(var(--safe-top)+8px)] backdrop-blur-md">
         <IconButton label="Back" onClick={() => router.push("/people")}>
           <ArrowLeft className="size-5" />
         </IconButton>
-        <span className="inline-flex size-9 items-center justify-center rounded-full bg-surface-2 text-ink-2">
+        <span className="inline-flex size-9 items-center justify-center rounded-full bg-mint text-mint-ink">
           <UserRound className="size-4" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h1 className="truncate text-[15px] font-semibold text-ink">{view.other.displayName}</h1>
-            <span className="rounded-full border border-success/40 bg-success/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-success">Real person</span>
+            <span className="rounded-full bg-mint px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-mint-ink">Real person</span>
           </div>
           <p className="truncate text-xs text-ink-3">
             {MODE_COPY[view.mode].label} · Local test mode{ended ? " · Ended" : ""}

@@ -45,6 +45,15 @@ browser and your conversations stay on your device.
   reports, rate limits), API routes, and a local test store. Disabled by
   default and honest about it. See [docs/HUMAN_MODE.md](docs/HUMAN_MODE.md).
 
+## Design
+
+Warm paper, deep charcoal, one vermilion for the action that matters on a
+screen, cobalt for the person's own messages, mint for "available". Headlines
+and the `hello.` wordmark use Fraunces, a soft optical-size serif; everything
+else is Geist. Tokens live in `src/app/globals.css`; the vermilion speech
+bubble on the Discover screen is the signature interaction and recurs in the
+icons and share image. Every text colour pairing meets WCAG AA contrast.
+
 ## Scripts
 
 | Command | What it does |

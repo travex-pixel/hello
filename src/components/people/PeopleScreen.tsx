@@ -15,8 +15,8 @@ import { peopleApi, PeopleApiError, type MeView, type StatusView, type Suggestio
 
 function Card({ title, children, tone = "default" }: { title?: string; children: React.ReactNode; tone?: "default" | "warning" }) {
   return (
-    <section className={tone === "warning" ? "rounded-xl border border-warning/40 bg-warning/10 p-4" : "rounded-xl border border-line bg-surface p-4"}>
-      {title && <h2 className="text-base font-semibold tracking-tight text-ink">{title}</h2>}
+    <section className={tone === "warning" ? "rounded-xl border border-warning/40 bg-warning/10 p-4" : "rounded-xl bg-surface p-4 shadow-card"}>
+      {title && <h2 className="display text-[22px] text-ink">{title}</h2>}
       <div className={title ? "mt-3 flex flex-col gap-3" : "flex flex-col gap-3"}>{children}</div>
     </section>
   );
@@ -66,7 +66,7 @@ function DisabledView() {
     <>
       <Card>
         <p className="text-sm leading-relaxed text-ink">
-          Real-people mode isn&rsquo;t enabled on this deployment, so nobody is available to meet. HELLO never puts an AI in a person&rsquo;s place: when there is no
+          Real-people mode isn&rsquo;t enabled on this deployment, so nobody is available to meet. hello never puts an AI in a person&rsquo;s place: when there is no
           one, it says so.
         </p>
       </Card>
@@ -126,7 +126,7 @@ function JoinForm({ founderCode, onJoined }: { founderCode?: string; onJoined: (
             onChange={(e) => setInviteCode(e.target.value)}
             placeholder="ABCD-EFGH"
             autoCapitalize="characters"
-            className="mt-1.5 h-12 w-full rounded-md border border-line bg-bg px-4 font-mono text-[15px] uppercase text-ink placeholder:text-ink-3 focus:border-accent/60"
+            className="mt-1.5 h-12 w-full rounded-md border border-line-strong bg-bg px-4 font-mono text-[15px] uppercase text-ink placeholder:text-ink-3 focus:border-cobalt"
           />
         </label>
         <label className="block text-sm font-medium text-ink">
@@ -136,7 +136,7 @@ function JoinForm({ founderCode, onJoined }: { founderCode?: string; onJoined: (
             onChange={(e) => setDisplayName(e.target.value)}
             maxLength={30}
             placeholder="First name or nickname"
-            className="mt-1.5 h-12 w-full rounded-md border border-line bg-bg px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-accent/60"
+            className="mt-1.5 h-12 w-full rounded-md border border-line-strong bg-bg px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-cobalt"
           />
         </label>
         <label className="flex items-start gap-3 text-sm text-ink">
@@ -492,11 +492,11 @@ export function PeopleScreen() {
         Back
       </Link>
       <div className="flex items-center gap-3">
-        <span className="inline-flex size-11 items-center justify-center rounded-full bg-surface-2 text-ink-2">
+        <span className="inline-flex size-11 items-center justify-center rounded-full bg-mint text-mint-ink">
           <UsersRound className="size-5" aria-hidden="true" />
         </span>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">Real people</h1>
+          <h1 className="display text-[34px] text-ink">Real people</h1>
           <p className="text-sm text-ink-3">Invite-only. Separate from the AI demo.</p>
         </div>
       </div>

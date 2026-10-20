@@ -42,7 +42,7 @@ export function FunnelView() {
   ];
   return (
     <div className="px-5 pt-[calc(var(--safe-top)+14px)]">
-      <h1 className="text-xl font-semibold text-ink">Local funnel (dev only)</h1>
+      <h1 className="display text-[30px] text-ink">Local funnel (dev only)</h1>
       <p className="mt-1 text-sm text-ink-3">Computed from events stored in this browser. No data leaves the device.</p>
       <table className="mt-4 w-full text-sm">
         <tbody>

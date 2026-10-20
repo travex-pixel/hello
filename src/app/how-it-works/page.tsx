@@ -6,8 +6,8 @@ export const metadata = { title: "How it works" };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-line bg-surface p-4">
-      <h2 className="text-base font-semibold tracking-tight text-ink">{title}</h2>
+    <section className="rounded-xl bg-surface p-4 shadow-card">
+      <h2 className="display text-[22px] text-ink">{title}</h2>
       <div className="mt-2 space-y-2 text-sm leading-relaxed text-ink-2">{children}</div>
     </section>
   );
@@ -20,7 +20,7 @@ export default function HowItWorksPage() {
         <ArrowLeft className="size-4" aria-hidden="true" />
         Back
       </Link>
-      <h1 className="text-2xl font-semibold tracking-tight text-ink">How HELLO works</h1>
+      <h1 className="display text-[34px] text-ink">How hello works</h1>
 
       <Section title="One tap">
         <p>Pick what you&rsquo;re in the mood for, tap the button, and meet someone within seconds. No profile, no photos, no sign-up.</p>

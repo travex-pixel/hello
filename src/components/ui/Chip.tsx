@@ -15,12 +15,12 @@ export function Chip({ selected = false, className, children, type = "button", .
       aria-pressed={selected}
       className={cn(
         "inline-flex h-10 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors duration-150",
-        selected ? "border-accent/60 bg-accent-soft text-ink" : "border-line bg-surface text-ink-2 hover:border-line-strong hover:text-ink",
+        selected ? "border-accent bg-accent-soft text-accent-strong" : "border-line-strong bg-surface text-ink-2 hover:border-ink-3 hover:text-ink",
         className,
       )}
       {...rest}
     >
-      {selected && <Check className="size-3.5 text-accent-strong" aria-hidden="true" />}
+      {selected && <Check className="size-3.5" aria-hidden="true" />}
       {children}
     </button>
   );
