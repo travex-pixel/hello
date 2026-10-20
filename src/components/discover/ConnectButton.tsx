@@ -60,7 +60,7 @@ export function ConnectButton({ searching, onPress, label = "Say hello" }: Props
         />
         <span aria-hidden="true" className="absolute inset-[7px] z-10 rounded-full border border-white/25" />
         <motion.span
-          className="relative z-20 text-[15px] font-semibold uppercase tracking-[0.24em] text-white drop-shadow-[0_1px_1px_rgba(120,30,10,0.35)]"
+          className="relative z-20 max-w-[78%] text-balance text-[15px] font-semibold uppercase leading-snug tracking-[0.22em] text-white drop-shadow-[0_1px_1px_rgba(120,30,10,0.35)]"
           animate={{ opacity: searching ? 0 : 1, scale: searching ? 0.9 : 1 }}
           transition={{ duration: 0.2 }}
         >

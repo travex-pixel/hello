@@ -28,11 +28,12 @@ export function MessageBubble({ message, onRetry }: Props) {
         className={cn(
           "max-w-[82%] whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2.5 text-[15px] leading-relaxed",
           mine ? "rounded-br-[6px] bg-cobalt text-white" : "rounded-bl-[6px] bg-surface text-ink shadow-soft",
-          message.status === "failed" && "opacity-70",
+          (message.status === "failed" || message.status === "sending") && "opacity-70",
         )}
       >
         {message.text}
       </div>
+      {message.status === "sending" && <span className="mt-1 text-[11px] text-ink-3">Sending…</span>}
       {message.status === "failed" && (
         <button type="button" onClick={onRetry} className="mt-1 text-xs text-danger underline-offset-2 hover:underline">
           Not sent. Tap to retry

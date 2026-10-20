@@ -2,52 +2,41 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import type { Mode } from "@/lib/characters/types";
 import { PICKABLE_TOPICS, type TopicId } from "@/lib/characters/topics";
-import { createRateLimiter } from "@/lib/trust/rate-limit";
 import {
   AVAILABILITY_SESSION_MS,
-  acceptRequest,
   availabilityActive,
-  cancelRequest,
   createInvitation,
   createRequest,
-  declineRequest,
   discoverPeople,
   isBlockedEitherWay,
   isParticipant,
   normalizeInviteCode,
-  redeemInvitation,
   requestIsLive,
   type Account,
   type AccountId,
   type Availability,
   type ConversationRequest,
-  type HumanConversation,
   type Suggestion,
 } from "../index";
 import { neighbours } from "../graph";
-import { humanBackend } from "./config";
-import { getStore } from "./store";
+import type { AuthIdentity } from "./auth";
+import { getStore } from "./backend";
+import { humanConfig, type HumanBackend } from "./config";
 
 const MODES: Mode[] = ["bored", "warmup", "surprise"];
 const MAX_MESSAGE_CHARS = 1000;
+const MAX_ACTIVE_INVITES = 5;
+/** Someone who declined you, or let your request lapse, is not asked again for this long. */
+const RETRY_SAME_PERSON_MS = 10 * 60_000;
 
-const requestLimiter = createRateLimiter(5, 10 * 60_000);
-const messageLimiter = createRateLimiter(60, 60_000);
-const inviteLimiter = createRateLimiter(10, 24 * 60 * 60_000);
-const joinLimiter = createRateLimiter(10, 60 * 60_000);
-
-declare global {
-  var __helloFounderCode: string | undefined;
-}
-
-/** First account in local test mode is created with this code; printed to the server log. */
-function founderCode(): string {
-  if (!globalThis.__helloFounderCode) {
-    globalThis.__helloFounderCode = process.env.HELLO_FOUNDER_INVITE?.toUpperCase() || normalizeInviteCode(randomBytes(4).toString("hex"));
-    console.info(`[hello] Real-people local test mode. Founder invite code: ${globalThis.__helloFounderCode}`);
-  }
-  return globalThis.__helloFounderCode;
-}
+export const LIMITS = {
+  join: { limit: 10, windowMs: 60 * 60_000 },
+  code: { limit: 6, windowMs: 60 * 60_000 },
+  request: { limit: 20, windowMs: 10 * 60_000 },
+  message: { limit: 60, windowMs: 60_000 },
+  invite: { limit: 10, windowMs: 24 * 60 * 60_000 },
+  report: { limit: 10, windowMs: 24 * 60 * 60_000 },
+};
 
 export class ServiceError extends Error {
   constructor(
@@ -58,7 +47,16 @@ export class ServiceError extends Error {
   }
 }
 
-const id = (prefix: string) => `${prefix}_${randomBytes(6).toString("hex")}`;
+const newId = (prefix: string) => `${prefix}_${randomBytes(8).toString("hex")}`;
+
+/** Throws when the shared, cross-instance rate limit is exceeded. */
+export async function limit(key: string, rule: { limit: number; windowMs: number }) {
+  if (!(await getStore().hit(key, rule.limit, rule.windowMs, Date.now()))) throw new ServiceError("rate_limited", 429);
+}
+
+function cleanInterests(list: string[] | undefined): TopicId[] {
+  return (list ?? []).filter((t): t is TopicId => (PICKABLE_TOPICS as string[]).includes(t)).slice(0, 8);
+}
 
 export interface PublicAccount {
   id: AccountId;
@@ -74,20 +72,26 @@ function publicAccount(a: Account): PublicAccount {
 
 export interface StatusView {
   enabled: boolean;
-  backend: "none" | "memory";
-  /** Whether this browser holds a valid member session. */
+  backend: HumanBackend;
+  auth: "supabase" | "dev" | null;
+  signedIn: boolean;
   joined: boolean;
-  /** Only in local test mode, only until the first account exists. */
-  founderCode?: string;
+  /** Members only: how many other members are looking for a chat right now. Real count, not a guess. */
+  availableNow?: number;
 }
 
-export async function status(accountId: AccountId | null): Promise<StatusView> {
-  const backend = humanBackend();
-  if (backend === "none") return { enabled: false, backend, joined: false };
-  const store = getStore();
-  const count = await store.countAccounts();
-  const joined = !!accountId && !!(await store.getAccount(accountId));
-  return { enabled: true, backend, joined, founderCode: count === 0 ? founderCode() : undefined };
+export async function status(identity: AuthIdentity | null, authKind: "supabase" | "dev"): Promise<StatusView> {
+  const { backend } = humanConfig();
+  if (backend === "none") return { enabled: false, backend, auth: null, signedIn: false, joined: false };
+  // Touching the store creates the schema, so opening the app once prepares a new database.
+  await getStore().countAccounts();
+  const account = identity ? await getStore().getAccountByAuthUser(identity.userId) : undefined;
+  let availableNow: number | undefined;
+  if (account && !account.suspended) {
+    const graph = await getStore().snapshot(Date.now());
+    availableNow = Array.from(graph.availability.keys()).filter((id) => id !== account.id && graph.accounts.get(id)?.discoverable).length;
+  }
+  return { enabled: true, backend, auth: authKind, signedIn: !!identity, joined: !!account, availableNow };
 }
 
 export interface JoinInput {
@@ -99,42 +103,26 @@ export interface JoinInput {
   disclosedInterests: string[];
 }
 
-export async function join(input: JoinInput, ip: string): Promise<Account> {
-  if (!joinLimiter.allow(ip)) throw new ServiceError("rate_limited", 429);
-  const store = getStore();
-  const displayName = input.displayName.trim().slice(0, 30);
+export async function join(identity: AuthIdentity, input: JoinInput): Promise<Account> {
+  const displayName = input.displayName.trim().replace(/\s+/g, " ").slice(0, 30);
   if (displayName.length < 2) throw new ServiceError("name_too_short");
   if (!input.confirmAdult) throw new ServiceError("age_not_confirmed");
-  const code = normalizeInviteCode(input.inviteCode);
   const now = Date.now();
-  const interests = input.disclosedInterests.filter((t): t is TopicId => (PICKABLE_TOPICS as string[]).includes(t)).slice(0, 8);
-
   const account: Account = {
-    id: id("acc"),
+    id: newId("acc"),
+    authUserId: identity.userId,
     displayName,
     createdAt: now,
-    // Local test mode has no email flow; production must set this from a real verification.
-    emailVerified: true,
-    ageVerified: true,
+    emailVerified: identity.emailVerified,
+    ageVerified: true, // self-declared; see the privacy notice
     suspended: false,
     discoverable: input.discoverable,
     shareAsMutual: input.shareAsMutual,
-    disclosedInterests: interests,
+    disclosedInterests: cleanInterests(input.disclosedInterests),
     language: "en",
   };
-
-  const isFounder = (await store.countAccounts()) === 0 && code === founderCode();
-  if (!isFounder) {
-    const invitation = await store.getInvitation(code);
-    if (!invitation) throw new ServiceError("invalid_invite", 404);
-    const result = redeemInvitation(invitation, account.id, now);
-    if (!result.ok) throw new ServiceError(`invite_${result.reason}`);
-    await store.saveAccount(account);
-    await store.saveInvitation(result.invitation);
-    await store.addConnection(result.connection);
-  } else {
-    await store.saveAccount(account);
-  }
+  const result = await getStore().joinWithInvite(account, normalizeInviteCode(input.inviteCode), now);
+  if (!result.ok) throw new ServiceError(result.reason, result.reason === "invalid_invite" ? 404 : 409);
   return account;
 }
 
@@ -148,41 +136,41 @@ export interface MeView {
   invitations: { code: string; usesLeft: number; expiresAt: number }[];
 }
 
-export async function me(accountId: AccountId): Promise<MeView> {
+async function nameOf(id: AccountId) {
+  return (await getStore().getAccount(id))?.displayName ?? "Former member";
+}
+
+export async function me(account: Account): Promise<MeView> {
   const store = getStore();
-  const account = await store.getAccount(accountId);
-  if (!account) throw new ServiceError("no_account", 401);
   const now = Date.now();
-  const connections = await store.listConnections();
-  const friends = Array.from(neighbours(connections, accountId));
-  const friendAccounts = await Promise.all(friends.map((f) => store.getAccount(f)));
-  const availability = await store.getAvailability(accountId);
-  const requests = await store.listRequestsFor(accountId);
-  const conversations = await store.listConversationsFor(accountId);
-  const invitations = await store.listInvitationsBy(accountId);
-
-  const nameOf = async (idOther: AccountId) => (await store.getAccount(idOther))?.displayName ?? "Former member";
-
+  const [connections, availability, requests, conversations, invitations] = await Promise.all([
+    store.listConnections(),
+    store.getAvailability(account.id),
+    store.listRequestsFor(account.id),
+    store.listConversationsFor(account.id),
+    store.listInvitationsBy(account.id),
+  ]);
+  const friends = await Promise.all(Array.from(neighbours(connections, account.id)).map((f) => store.getAccount(f)));
   return {
     account: publicAccount(account),
-    connections: friendAccounts
+    connections: friends
       .filter((a): a is Account => !!a)
-      .map((a) => ({ id: a.id, displayName: a.displayName, since: connections.find((c) => (c.a === a.id && c.b === accountId) || (c.b === a.id && c.a === accountId))?.createdAt ?? 0 })),
+      .map((a) => ({ id: a.id, displayName: a.displayName, since: connections.find((c) => (c.a === a.id && c.b === account.id) || (c.b === a.id && c.a === account.id))?.createdAt ?? 0 })),
     availability: availabilityActive(availability, now) ? availability : null,
     incoming: await Promise.all(
-      requests.filter((r) => r.toId === accountId && requestIsLive(r, now)).map(async (r) => ({ id: r.id, fromName: await nameOf(r.fromId), mode: r.mode, expiresAt: r.expiresAt })),
+      requests.filter((r) => r.toId === account.id && requestIsLive(r, now)).map(async (r) => ({ id: r.id, fromName: await nameOf(r.fromId), mode: r.mode, expiresAt: r.expiresAt })),
     ),
     outgoing: await Promise.all(
       requests
-        .filter((r) => r.fromId === accountId && (requestIsLive(r, now) || (r.status === "accepted" && now - r.createdAt < 10 * 60_000)))
+        .filter((r) => r.fromId === account.id && (requestIsLive(r, now) || (r.status === "accepted" && now - r.createdAt < 10 * 60_000)))
         .map(async (r) => ({ id: r.id, toName: await nameOf(r.toId), mode: r.mode, expiresAt: r.expiresAt, status: r.status, conversationId: r.conversationId })),
     ),
     conversations: await Promise.all(
       conversations
         .sort((a, b) => b.startedAt - a.startedAt)
-        .slice(0, 20)
+        .slice(0, 30)
         .map(async (c) => {
-          const other = c.participants.find((p) => p !== accountId)!;
+          const other = c.participants.find((p) => p !== account.id)!;
           return { id: c.id, withName: await nameOf(other), withId: other, mode: c.mode, startedAt: c.startedAt, endedAt: c.endedAt };
         }),
     ),
@@ -192,87 +180,142 @@ export async function me(accountId: AccountId): Promise<MeView> {
   };
 }
 
-export async function setAvailability(accountId: AccountId, on: boolean, mode: Mode): Promise<Availability | null> {
+export async function setAvailability(account: Account, on: boolean, mode: Mode): Promise<Availability | null> {
   const store = getStore();
   if (!on) {
-    await store.clearAvailability(accountId);
+    await store.clearAvailability(account.id);
     return null;
   }
   if (!MODES.includes(mode)) throw new ServiceError("bad_mode");
   const now = Date.now();
-  const av: Availability = { accountId, mode, startedAt: now, expiresAt: now + AVAILABILITY_SESSION_MS };
+  const av: Availability = { accountId: account.id, mode, startedAt: now, expiresAt: now + AVAILABILITY_SESSION_MS };
   await store.setAvailability(av);
   return av;
 }
 
-export async function updateSettings(accountId: AccountId, patch: { discoverable?: boolean; shareAsMutual?: boolean; disclosedInterests?: string[] }): Promise<PublicAccount> {
-  const store = getStore();
-  const account = await store.getAccount(accountId);
-  if (!account) throw new ServiceError("no_account", 401);
-  if (typeof patch.discoverable === "boolean") account.discoverable = patch.discoverable;
-  if (typeof patch.shareAsMutual === "boolean") account.shareAsMutual = patch.shareAsMutual;
-  if (Array.isArray(patch.disclosedInterests)) {
-    account.disclosedInterests = patch.disclosedInterests.filter((t): t is TopicId => (PICKABLE_TOPICS as string[]).includes(t)).slice(0, 8);
-  }
-  await store.saveAccount(account);
-  return publicAccount(account);
+export async function updateSettings(account: Account, patch: { discoverable?: boolean; shareAsMutual?: boolean; disclosedInterests?: string[] }): Promise<PublicAccount> {
+  const next = { ...account };
+  if (typeof patch.discoverable === "boolean") next.discoverable = patch.discoverable;
+  if (typeof patch.shareAsMutual === "boolean") next.shareAsMutual = patch.shareAsMutual;
+  if (Array.isArray(patch.disclosedInterests)) next.disclosedInterests = cleanInterests(patch.disclosedInterests);
+  await getStore().updateAccount(next);
+  return publicAccount(next);
 }
 
-export async function discover(accountId: AccountId, mode: Mode): Promise<{ suggestions: Suggestion[]; viewerAvailable: boolean }> {
+export async function discover(account: Account, mode: Mode): Promise<{ suggestions: Suggestion[]; viewerAvailable: boolean }> {
+  const now = Date.now();
+  const graph = await getStore().snapshot(now);
+  const viewerAvailable = availabilityActive(graph.availability.get(account.id), now);
+  return { suggestions: viewerAvailable ? discoverPeople(graph, account.id, mode, now, humanConfig().scope) : [], viewerAvailable };
+}
+
+export async function createInvite(account: Account) {
   const store = getStore();
   const now = Date.now();
-  const graph = await store.snapshot();
-  const viewerAvailable = availabilityActive(graph.availability.get(accountId), now);
-  return { suggestions: viewerAvailable ? discoverPeople(graph, accountId, mode, now) : [], viewerAvailable };
-}
-
-export async function createInvite(accountId: AccountId) {
-  if (!inviteLimiter.allow(accountId)) throw new ServiceError("rate_limited", 429);
-  const inv = createInvitation(accountId, Date.now());
-  await getStore().saveInvitation(inv);
+  const active = (await store.listInvitationsBy(account.id)).filter((i) => !i.revoked && i.expiresAt > now && i.redeemedBy.length < i.maxUses);
+  if (active.length >= MAX_ACTIVE_INVITES) throw new ServiceError("too_many_invites", 409);
+  await limit(`invite:${account.id}`, LIMITS.invite);
+  const inv = createInvitation(account.id, now, { random: () => randomBytes(1)[0] / 256 });
+  await store.saveInvitation(inv);
   return { code: inv.code, expiresAt: inv.expiresAt, usesLeft: inv.maxUses };
 }
 
-export async function revokeConnection(accountId: AccountId, otherId: AccountId) {
-  await getStore().removeConnection(accountId, otherId);
+export async function revokeInvite(account: Account, code: string) {
+  if (!(await getStore().revokeInvitation(normalizeInviteCode(code), account.id))) throw new ServiceError("not_found", 404);
 }
 
-export async function sendRequest(accountId: AccountId, toId: AccountId, mode: Mode): Promise<ConversationRequest> {
+export async function revokeConnection(account: Account, otherId: AccountId) {
+  await getStore().removeConnection(account.id, otherId);
+}
+
+export async function sendRequest(account: Account, toId: AccountId, mode: Mode): Promise<ConversationRequest> {
   if (!MODES.includes(mode)) throw new ServiceError("bad_mode");
-  if (!requestLimiter.allow(accountId)) throw new ServiceError("rate_limited", 429);
-  const store = getStore();
+  await limit(`request:${account.id}`, LIMITS.request);
   const now = Date.now();
-  const existing = (await store.listRequestsFor(accountId)).find((r) => r.fromId === accountId && r.toId === toId && requestIsLive(r, now));
-  if (existing) return existing;
-  const graph = await store.snapshot();
-  const result = createRequest(graph, id("req"), accountId, toId, mode, now);
+  const graph = await getStore().snapshot(now);
+  const result = createRequest(graph, newId("req"), account.id, toId, mode, now, humanConfig().scope);
   if (!result.ok) throw new ServiceError(result.reason, 403);
-  await store.saveRequest(result.request);
-  return result.request;
+  return getStore().createRequest(result.request, now);
 }
 
-export async function answerRequest(accountId: AccountId, requestId: string, action: "accept" | "decline" | "cancel"): Promise<{ request: ConversationRequest; conversationId?: string }> {
+export async function answerRequest(account: Account, requestId: string, action: "accept" | "decline" | "cancel"): Promise<{ conversationId?: string }> {
   const store = getStore();
-  const req = await store.getRequest(requestId);
-  if (!req) throw new ServiceError("not_found", 404);
-  const now = Date.now();
   if (action === "accept") {
-    // Both sides must still be eligible for each other at the moment of acceptance.
-    const graph = await store.snapshot();
-    if (isBlockedEitherWay(graph.blocks, req.fromId, req.toId)) throw new ServiceError("blocked", 403);
-    const result = acceptRequest(req, accountId, id("hc"), now);
-    if (!result.ok) throw new ServiceError(result.reason, 403);
-    await store.saveRequest(result.request);
-    await store.saveConversation(result.conversation);
-    // Starting a conversation ends availability for both: they're busy now.
-    await store.clearAvailability(req.fromId);
-    await store.clearAvailability(req.toId);
-    return { request: result.request, conversationId: result.conversation.id };
+    const result = await store.acceptRequest(requestId, account.id, newId("hc"), Date.now());
+    if (!result.ok) throw new ServiceError(result.reason, result.reason === "not_found" ? 404 : 409);
+    return { conversationId: result.conversationId };
   }
-  const result = action === "decline" ? declineRequest(req, accountId) : cancelRequest(req, accountId);
-  if (!result.ok) throw new ServiceError(result.reason, 403);
-  await store.saveRequest(result.request);
-  return { request: result.request };
+  const ok = await store.closeRequest(requestId, account.id, action === "decline" ? "declined" : "cancelled");
+  if (!ok) throw new ServiceError("not_pending", 409);
+  return {};
+}
+
+export type MatchState =
+  | { state: "connected"; conversationId: string; withName: string }
+  | { state: "incoming"; requestId: string; fromName: string; mode: Mode; expiresAt: number }
+  | { state: "requested"; requestId: string; toName: string; expiresAt: number }
+  | { state: "waiting"; availableUntil: number; othersLooking: number };
+
+/**
+ * "Chat with a mate". Called repeatedly while the person is looking; each
+ * call is safe to repeat. A conversation only starts when the other person
+ * accepts. Nobody is ever swapped for an AI here: the client offers AI
+ * separately and only when the person chooses it.
+ */
+export async function match(account: Account, mode: Mode, since: number): Promise<MatchState> {
+  if (!MODES.includes(mode)) throw new ServiceError("bad_mode");
+  const store = getStore();
+  const now = Date.now();
+  const [requests, conversations] = await Promise.all([store.listRequestsFor(account.id), store.listConversationsFor(account.id)]);
+
+  const fresh = conversations.find((c) => !c.endedAt && c.startedAt >= since);
+  if (fresh) {
+    const other = fresh.participants.find((p) => p !== account.id)!;
+    return { state: "connected", conversationId: fresh.id, withName: await nameOf(other) };
+  }
+
+  const incoming = requests.filter((r) => r.toId === account.id && requestIsLive(r, now)).sort((a, b) => a.createdAt - b.createdAt)[0];
+  if (incoming) return { state: "incoming", requestId: incoming.id, fromName: await nameOf(incoming.fromId), mode: incoming.mode, expiresAt: incoming.expiresAt };
+
+  const outgoing = requests.find((r) => r.fromId === account.id && requestIsLive(r, now));
+  if (outgoing) return { state: "requested", requestId: outgoing.id, toName: await nameOf(outgoing.toId), expiresAt: outgoing.expiresAt };
+
+  // Stay visible while looking. Keep the original start so fair ordering holds.
+  const current = await store.getAvailability(account.id);
+  if (!availabilityActive(current, now) || current.expiresAt - now < 5 * 60_000 || current.mode !== mode) {
+    const startedAt = availabilityActive(current, now) ? current.startedAt : now;
+    await store.setAvailability({ accountId: account.id, mode, startedAt, expiresAt: now + AVAILABILITY_SESSION_MS });
+  }
+
+  const graph = await store.snapshot(now);
+  // Don't ask someone again right after they declined or let your request lapse.
+  const recentlyAsked = new Set(
+    requests.filter((r) => r.fromId === account.id && r.status !== "accepted" && now - r.createdAt < RETRY_SAME_PERSON_MS && !requestIsLive(r, now)).map((r) => r.toId),
+  );
+  const candidates = discoverPeople(graph, account.id, mode, now, humanConfig().scope).filter((s) => !recentlyAsked.has(s.accountId));
+  for (const candidate of candidates) {
+    // Skip people already being asked by, or asking, someone else.
+    const theirs = await store.listRequestsFor(candidate.accountId);
+    if (theirs.some((r) => requestIsLive(r, now))) continue;
+    const made = createRequest(graph, newId("req"), account.id, candidate.accountId, mode, now, humanConfig().scope);
+    if (!made.ok) continue;
+    await limit(`request:${account.id}`, LIMITS.request);
+    const saved = await store.createRequest(made.request, now);
+    return { state: "requested", requestId: saved.id, toName: candidate.displayName, expiresAt: saved.expiresAt };
+  }
+  const available = availabilityActive(graph.availability.get(account.id), now) ? graph.availability.get(account.id)!.expiresAt : now + AVAILABILITY_SESSION_MS;
+  const othersLooking = Array.from(graph.availability.keys()).filter((id) => id !== account.id).length;
+  return { state: "waiting", availableUntil: available, othersLooking };
+}
+
+/** Stop looking: withdraw any pending request and switch availability off. */
+export async function cancelMatch(account: Account) {
+  const store = getStore();
+  const now = Date.now();
+  for (const r of await store.listRequestsFor(account.id)) {
+    if (r.fromId === account.id && requestIsLive(r, now)) await store.closeRequest(r.id, account.id, "cancelled");
+  }
+  await store.clearAvailability(account.id);
 }
 
 export interface ConversationView {
@@ -282,88 +325,79 @@ export interface ConversationView {
   endedAt?: number;
   endedByMe?: boolean;
   other: { id: AccountId; displayName: string };
-  messages: { id: string; mine: boolean; text: string; ts: number }[];
+  messages: { id: string; seq: number; clientId?: string; mine: boolean; text: string; ts: number }[];
 }
 
-export async function getConversation(accountId: AccountId, conversationId: string, since = 0): Promise<ConversationView> {
+export async function getConversation(account: Account, conversationId: string, afterSeq = 0): Promise<ConversationView> {
   const store = getStore();
   const c = await store.getConversation(conversationId);
-  if (!c || !isParticipant(c, accountId)) throw new ServiceError("not_found", 404);
-  const otherId = c.participants.find((p) => p !== accountId)!;
-  const other = await store.getAccount(otherId);
+  // Same answer for "doesn't exist" and "not yours", so ids can't be probed.
+  if (!c || !isParticipant(c, account.id)) throw new ServiceError("not_found", 404);
+  const otherId = c.participants.find((p) => p !== account.id)!;
+  const messages = await store.listMessages(conversationId, afterSeq, 200);
   return {
     id: c.id,
     mode: c.mode,
     startedAt: c.startedAt,
     endedAt: c.endedAt,
-    endedByMe: c.endedBy === accountId,
-    other: { id: otherId, displayName: other?.displayName ?? "Former member" },
-    messages: c.messages.filter((m) => m.ts > since).map((m) => ({ id: m.id, mine: m.senderId === accountId, text: m.text, ts: m.ts })),
+    endedByMe: c.endedBy === account.id,
+    other: { id: otherId, displayName: await nameOf(otherId) },
+    messages: messages.map((m) => ({ id: m.id, seq: m.seq, clientId: m.senderId === account.id ? m.clientId : undefined, mine: m.senderId === account.id, text: m.text, ts: m.ts })),
   };
 }
 
-export async function sendMessage(accountId: AccountId, conversationId: string, text: string) {
+export async function sendMessage(account: Account, conversationId: string, text: string, clientId: string) {
   const clean = text.trim().slice(0, MAX_MESSAGE_CHARS);
   if (!clean) throw new ServiceError("empty");
-  if (!messageLimiter.allow(accountId)) throw new ServiceError("rate_limited", 429);
+  if (!/^[A-Za-z0-9_-]{8,64}$/.test(clientId)) throw new ServiceError("bad_client_id");
   const store = getStore();
   const c = await store.getConversation(conversationId);
-  if (!c || !isParticipant(c, accountId)) throw new ServiceError("not_found", 404);
+  if (!c || !isParticipant(c, account.id)) throw new ServiceError("not_found", 404);
   if (c.endedAt) throw new ServiceError("ended", 409);
-  const other = c.participants.find((p) => p !== accountId)!;
-  if (isBlockedEitherWay(await store.listBlocks(), accountId, other)) throw new ServiceError("blocked", 403);
-  const message: HumanConversation["messages"][number] = { id: id("hm"), senderId: accountId, text: clean, ts: Date.now() };
-  c.messages.push(message);
-  if (c.messages.length > 500) c.messages.splice(0, c.messages.length - 500);
-  await store.saveConversation(c);
-  return { id: message.id, ts: message.ts };
+  const other = c.participants.find((p) => p !== account.id)!;
+  if (isBlockedEitherWay(await store.listBlocks(), account.id, other)) throw new ServiceError("blocked", 403);
+  await limit(`message:${account.id}`, LIMITS.message);
+  const { message } = await store.appendMessage({ id: newId("hm"), conversationId, senderId: account.id, clientId, text: clean, ts: Date.now() });
+  return { id: message.id, seq: message.seq, ts: message.ts };
 }
 
-export async function endConversation(accountId: AccountId, conversationId: string) {
+export async function endConversation(account: Account, conversationId: string) {
   const store = getStore();
   const c = await store.getConversation(conversationId);
-  if (!c || !isParticipant(c, accountId)) throw new ServiceError("not_found", 404);
-  if (!c.endedAt) {
-    c.endedAt = Date.now();
-    c.endedBy = accountId;
-    await store.saveConversation(c);
-  }
+  if (!c || !isParticipant(c, account.id)) throw new ServiceError("not_found", 404);
+  await store.endConversation(conversationId, account.id, Date.now());
 }
 
-export async function block(accountId: AccountId, otherId: AccountId) {
-  if (accountId === otherId) throw new ServiceError("self");
+export async function block(account: Account, otherId: AccountId) {
+  if (account.id === otherId) throw new ServiceError("self");
   const store = getStore();
-  await store.addBlock({ blockerId: accountId, blockedId: otherId, createdAt: Date.now() });
+  const now = Date.now();
+  await store.addBlock({ blockerId: account.id, blockedId: otherId, createdAt: now });
   // Blocking ends anything in flight between the two people.
-  for (const c of await store.listConversationsFor(accountId)) {
-    if (c.participants.includes(otherId) && !c.endedAt) {
-      c.endedAt = Date.now();
-      c.endedBy = accountId;
-      await store.saveConversation(c);
-    }
+  for (const c of await store.listConversationsFor(account.id)) {
+    if (c.participants.includes(otherId) && !c.endedAt) await store.endConversation(c.id, account.id, now);
   }
-  for (const r of await store.listRequestsFor(accountId)) {
-    if ((r.fromId === otherId || r.toId === otherId) && r.status === "pending") {
-      r.status = "cancelled";
-      await store.saveRequest(r);
-    }
+  for (const r of await store.listRequestsFor(account.id)) {
+    if (r.status !== "pending") continue;
+    if (r.fromId === account.id && r.toId === otherId) await store.closeRequest(r.id, account.id, "cancelled");
+    if (r.toId === account.id && r.fromId === otherId) await store.closeRequest(r.id, account.id, "declined");
   }
-  await store.removeConnection(accountId, otherId);
+  await store.removeConnection(account.id, otherId);
 }
 
-export async function report(accountId: AccountId, otherId: AccountId, reason: string, conversationId?: string) {
-  const store = getStore();
-  await store.addReport({ id: id("rep"), reporterId: accountId, reportedId: otherId, conversationId, reason: reason.slice(0, 200), createdAt: Date.now() });
+export async function report(account: Account, otherId: AccountId, reason: string, conversationId?: string) {
+  await limit(`report:${account.id}`, LIMITS.report);
+  await getStore().addReport({
+    id: newId("rep"),
+    reporterId: account.id,
+    reportedId: otherId,
+    conversationId,
+    reason: reason.slice(0, 200),
+    createdAt: Date.now(),
+    status: "open",
+  });
 }
 
-export async function deleteAccount(accountId: AccountId) {
-  const store = getStore();
-  for (const c of await store.listConversationsFor(accountId)) {
-    if (!c.endedAt) {
-      c.endedAt = Date.now();
-      c.endedBy = accountId;
-      await store.saveConversation(c);
-    }
-  }
-  await store.deleteAccount(accountId);
+export async function deleteAccount(account: Account) {
+  await getStore().deleteAccount(account.id, Date.now());
 }

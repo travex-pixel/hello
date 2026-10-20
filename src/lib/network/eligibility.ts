@@ -1,4 +1,4 @@
-import type { Account, AccountId, Availability, Block, GraphSnapshot } from "./types";
+import type { Account, AccountId, Availability, Block, DiscoveryScope, GraphSnapshot } from "./types";
 import { areConnected, reachFrom } from "./graph";
 
 /** How long "I'm up for a chat" lasts before it switches itself off. */
@@ -36,7 +36,13 @@ export type DiscoveryRefusal =
  * neither may have blocked the other, they must not already be direct
  * friends, and there must be a verified path of exactly two steps.
  */
-export function discoveryRefusal(graph: GraphSnapshot, viewerId: AccountId, candidateId: AccountId, now: number): DiscoveryRefusal | null {
+export function discoveryRefusal(
+  graph: GraphSnapshot,
+  viewerId: AccountId,
+  candidateId: AccountId,
+  now: number,
+  scope: DiscoveryScope = "friends_of_friends",
+): DiscoveryRefusal | null {
   if (viewerId === candidateId) return "self";
   const viewer = graph.accounts.get(viewerId);
   const candidate = graph.accounts.get(candidateId);
@@ -46,12 +52,14 @@ export function discoveryRefusal(graph: GraphSnapshot, viewerId: AccountId, cand
   if (!candidate.discoverable) return "candidate_not_discoverable";
   if (!availabilityActive(graph.availability.get(candidateId), now)) return "candidate_unavailable";
   if (isBlockedEitherWay(graph.blocks, viewerId, candidateId)) return "blocked";
+  // In the invite-only community every member can meet every other member.
+  if (scope === "community") return null;
   if (areConnected(graph.connections, viewerId, candidateId)) return "already_connected";
   const reach = reachFrom(graph.connections, viewerId, MAX_DISCOVERY_DEGREE).get(candidateId);
   if (!reach || reach.degree !== 2) return "no_verified_path";
   return null;
 }
 
-export function canDiscover(graph: GraphSnapshot, viewerId: AccountId, candidateId: AccountId, now: number): boolean {
-  return discoveryRefusal(graph, viewerId, candidateId, now) === null;
+export function canDiscover(graph: GraphSnapshot, viewerId: AccountId, candidateId: AccountId, now: number, scope: DiscoveryScope = "friends_of_friends"): boolean {
+  return discoveryRefusal(graph, viewerId, candidateId, now, scope) === null;
 }

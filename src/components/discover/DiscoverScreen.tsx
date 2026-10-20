@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Settings2 } from "lucide-react";
 import { useHello } from "@/lib/conversation/store";
@@ -14,6 +15,9 @@ import { ConnectButton } from "./ConnectButton";
 import { MatchCard } from "./MatchCard";
 import { ModeSelector } from "./ModeSelector";
 import { useDiscovery } from "./useDiscovery";
+import { MatePanel } from "./MatePanel";
+import { useMateMatch } from "./useMateMatch";
+import { peopleApi, type StatusView } from "@/components/people/api";
 
 export function DiscoverScreen() {
   const reduce = useReducedMotion();
@@ -22,12 +26,48 @@ export function DiscoverScreen() {
   const blocked = useHello((s) => s.blockedCharacterIds);
   const unblock = useHello((s) => s.unblockCharacter);
   const { state, start, tryAnother, accept, reset } = useDiscovery();
-  const searching = state.status === "searching";
+  const router = useRouter();
+  const mate = useMateMatch(mode);
+  const [people, setPeople] = useState<StatusView | null>(null);
+  const humans = !!people?.enabled;
+  const lookingForMate = mate.view.phase === "looking";
+  const mateBusy = mate.view.phase === "looking" && !mate.view.timedOut && mate.view.match?.state !== "incoming";
+  const searching = state.status === "searching" || mateBusy;
   const copy = MODE_COPY[mode];
 
   useEffect(() => {
     track("landing_viewed");
+    let cancelled = false;
+    const load = () =>
+      peopleApi.status().then(
+        (s) => !cancelled && setPeople(s),
+        () => undefined,
+      );
+    void load();
+    window.addEventListener("focus", load);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", load);
+    };
   }, []);
+
+  // Someone accepted (or we accepted): go straight into the real conversation.
+  useEffect(() => {
+    if (mate.view.phase === "connected") router.push(`/people/chat/${mate.view.conversationId}`);
+  }, [mate.view, router]);
+
+  /** Primary action. With real-people mode on it looks for a mate; otherwise it's the AI demo. */
+  const onPrimary = () => {
+    if (!humans) return void start();
+    if (!people?.joined) return router.push("/people");
+    track("discovery_tapped", { mode, source: "human" });
+    mate.start();
+  };
+
+  const chooseAI = () => {
+    mate.stop();
+    void start();
+  };
 
   const fade = {
     initial: reduce ? { opacity: 0 } : { opacity: 0, y: 8 },
@@ -59,16 +99,41 @@ export function DiscoverScreen() {
               <p className="mt-4 text-[16px] text-ink-2">You don&rsquo;t need a reason to say hello.</p>
 
               <div className="mt-7 w-full max-w-[380px]">
-                <ModeSelector value={mode} onChange={setMode} disabled={searching} />
+                <ModeSelector value={mode} onChange={setMode} disabled={searching || lookingForMate} />
               </div>
 
-              <div className="my-9">
-                <ConnectButton searching={searching} onPress={() => void start()} />
-              </div>
+              {lookingForMate && mate.view.phase === "looking" && (mate.view.timedOut || mate.view.match?.state === "incoming") ? (
+                <div className="mt-7 w-full">
+                  <MatePanel view={mate.view} onStop={mate.stop} onKeepLooking={mate.keepLooking} onChooseAI={chooseAI} onRespond={(id, action) => void mate.respond(id, action)} />
+                </div>
+              ) : (
+                <div className="my-9">
+                  <ConnectButton searching={searching} onPress={onPrimary} label={humans ? "Chat with a mate" : "Say hello"} />
+                </div>
+              )}
 
               <div className="min-h-[52px]" aria-live="polite">
                 <AnimatePresence mode="wait" initial={false}>
-                  {searching ? (
+                  {lookingForMate && mate.view.phase === "looking" ? (
+                    !mate.view.timedOut && mate.view.match?.state !== "incoming" ? (
+                      <motion.div key="mate" {...fade}>
+                        <MatePanel view={mate.view} onStop={mate.stop} onKeepLooking={mate.keepLooking} onChooseAI={chooseAI} onRespond={(id, action) => void mate.respond(id, action)} />
+                      </motion.div>
+                    ) : null
+                  ) : humans && !searching ? (
+                    <motion.div key="human-blurb" {...fade} className="flex flex-col items-center">
+                      <p className="text-[16px] font-medium text-ink">
+                        {!people?.joined
+                          ? "Real people from the invite-only beta."
+                          : people.availableNow
+                            ? `${people.availableNow} ${people.availableNow === 1 ? "mate is" : "mates are"} looking for a chat now.`
+                            : "Real people from the beta. Nobody's looking right now."}
+                      </p>
+                      <Button variant="ghost" className="mt-1" onClick={() => void start()}>
+                        Chat with AI instead
+                      </Button>
+                    </motion.div>
+                  ) : searching ? (
                     <motion.div key="finding" {...fade}>
                       <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-accent">{copy.finding}</p>
                       <p className="mt-1.5 text-sm text-ink-2">Looking for a good conversation.</p>
@@ -124,10 +189,18 @@ export function DiscoverScreen() {
           </Link>
         </p>
         <p className="mt-1.5">
-          Real people are invite-only.{" "}
-          <Link href="/people" className="text-ink-2 underline-offset-4 hover:underline">
-            See how that works
-          </Link>
+          {humans && people?.joined ? (
+            <Link href="/people" className="text-ink-2 underline-offset-4 hover:underline">
+              Your mates and invites
+            </Link>
+          ) : (
+            <>
+              Real people are invite-only.{" "}
+              <Link href="/people" className="text-ink-2 underline-offset-4 hover:underline">
+                {humans ? "Sign in or join" : "See how that works"}
+              </Link>
+            </>
+          )}
         </p>
       </footer>
     </div>

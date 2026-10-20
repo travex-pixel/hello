@@ -46,24 +46,27 @@ export default function HowItWorksPage() {
         <p>They remember what you tell them within a conversation (your name, what you like) and forget it when you clear your history.</p>
       </Section>
 
-      <Section title="Real people, later">
+      <Section title="Real people">
         <p>
-          Real-people mode is designed as an invite-only community where you meet friends of friends who have said they&rsquo;re up for a chat right
-          now. Both people have to accept before a conversation starts, availability switches off by itself, and you can block or report anyone.
+          Chatting with real people is a private, invite-only beta. Members sign in with an emailed code and tap <strong className="text-ink">Chat with a mate</strong>{" "}
+          when they genuinely have time. A conversation only starts when the other person accepts, and anyone can leave, block or report at any time.
         </p>
         <p>
-          It is not enabled on this deployment. If nobody is available you&rsquo;ll be told so, and offered the AI demo as an option, never an AI
-          pretending to be a person.{" "}
+          If nobody is free, hello tells you and offers an AI character instead. That&rsquo;s your choice: an AI is never put in a person&rsquo;s place.{" "}
           <Link href="/people" className="text-ink underline-offset-4 hover:underline">
-            Details
+            Mates
           </Link>
         </p>
       </Section>
 
       <Section title="Your data">
         <p>
-          Demo conversations, preferences and anonymous usage events are stored in your browser only. Clear them any time from Profile. The app does
-          not ask for your contacts, location or email to try the demo.
+          AI conversations, preferences and anonymous usage events are stored in your browser only. Clear them any time from Profile. The AI demo
+          doesn&rsquo;t ask for your contacts, location or email. For the mates beta, see the{" "}
+          <Link href="/privacy" className="text-ink underline-offset-4 hover:underline">
+            privacy notice
+          </Link>
+          .
         </p>
       </Section>
     </div>

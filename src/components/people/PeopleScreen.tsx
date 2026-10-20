@@ -11,7 +11,8 @@ import { track } from "@/lib/analytics/track";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { ModeSelector } from "@/components/discover/ModeSelector";
-import { peopleApi, PeopleApiError, type MeView, type StatusView, type Suggestion } from "./api";
+import { describeError, peopleApi, PeopleApiError, type MeView, type StatusView, type Suggestion } from "./api";
+import { SignIn } from "./SignIn";
 
 function Card({ title, children, tone = "default" }: { title?: string; children: React.ReactNode; tone?: "default" | "warning" }) {
   return (
@@ -22,36 +23,25 @@ function Card({ title, children, tone = "default" }: { title?: string; children:
   );
 }
 
-const ERRORS: Record<string, string> = {
-  invalid_invite: "That invite code isn't valid.",
-  invite_expired: "That invite has expired.",
-  invite_exhausted: "That invite has been used up.",
-  invite_revoked: "That invite was withdrawn.",
-  invite_self: "You can't use your own invite.",
-  invite_already_redeemed: "You've already used that invite.",
-  name_too_short: "Please enter a name of at least two characters.",
-  age_not_confirmed: "You need to confirm you're 18 or over.",
-  rate_limited: "Too many attempts. Please wait a little.",
-};
+
 
 function HowItWillWork() {
   return (
     <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-ink-2">
       <li>
-        <strong className="text-ink">Invitation.</strong> Someone who knows you sends you a code. Accepting it connects the two of you, nothing more.
+        <strong className="text-ink">Invitation.</strong> A member sends you a code. Joining with it connects the two of you, nothing more.
       </li>
       <li>
-        <strong className="text-ink">Availability.</strong> You switch on &ldquo;I&rsquo;m up for a chat&rdquo; when you mean it. It turns itself off after 30 minutes.
+        <strong className="text-ink">Chat with a mate.</strong> Tap it on the home screen when you genuinely have time. You become visible to other members who are looking too, for up to 30 minutes.
       </li>
       <li>
-        <strong className="text-ink">Friends of friends.</strong> You&rsquo;re shown people you don&rsquo;t know yet who are one connection away and also available. Context like
-        &ldquo;You both know Sarah&rdquo; appears only if Sarah agreed to be named.
+        <strong className="text-ink">Both say yes.</strong> One person asks, the other accepts. No one is put into a chat without agreeing.
       </li>
       <li>
-        <strong className="text-ink">Both say yes.</strong> A conversation starts only when one person asks and the other accepts, within two minutes.
+        <strong className="text-ink">Nobody free?</strong> You&rsquo;ll be told, and offered a chat with an AI character instead. It&rsquo;s your choice, and AI is always labelled.
       </li>
       <li>
-        <strong className="text-ink">Your call, always.</strong> Leave, block or report at any time. No contact import, no location, no friend lists shown to others.
+        <strong className="text-ink">Your call, always.</strong> Leave, block or report at any time. Other members see your first name, never your email.
       </li>
     </ol>
   );
@@ -66,7 +56,7 @@ function DisabledView() {
     <>
       <Card>
         <p className="text-sm leading-relaxed text-ink">
-          Real-people mode isn&rsquo;t enabled on this deployment, so nobody is available to meet. hello never puts an AI in a person&rsquo;s place: when there is no
+          Chatting with real people isn&rsquo;t switched on here yet, so nobody is available to meet. hello never puts an AI in a person&rsquo;s place: when there is no
           one, it says so.
         </p>
       </Card>
@@ -84,8 +74,8 @@ function DisabledView() {
   );
 }
 
-function JoinForm({ founderCode, onJoined }: { founderCode?: string; onJoined: () => void }) {
-  const [inviteCode, setInviteCode] = useState(founderCode ?? "");
+function JoinForm({ onJoined }: { onJoined: () => void }) {
+  const [inviteCode, setInviteCode] = useState(() => (typeof window === "undefined" ? "" : (new URLSearchParams(window.location.search).get("invite") ?? "")));
   const [displayName, setDisplayName] = useState("");
   const [confirmAdult, setConfirmAdult] = useState(false);
   const [discoverable, setDiscoverable] = useState(true);
@@ -101,7 +91,7 @@ function JoinForm({ founderCode, onJoined }: { founderCode?: string; onJoined: (
       await peopleApi.join({ inviteCode, displayName, confirmAdult, discoverable, shareAsMutual, disclosedInterests: interests });
       onJoined();
     } catch (e) {
-      setError(e instanceof PeopleApiError ? (ERRORS[e.code] ?? "Something went wrong. Please try again.") : "Something went wrong.");
+      setError(describeError(e));
     } finally {
       setBusy(false);
     }
@@ -114,11 +104,7 @@ function JoinForm({ founderCode, onJoined }: { founderCode?: string; onJoined: (
           Accepting an invitation connects you with the person who invited you. It doesn&rsquo;t start any conversation and doesn&rsquo;t share your connections with
           anyone.
         </p>
-        {founderCode && (
-          <p className="rounded-md bg-surface-2 p-3 text-xs leading-relaxed text-ink-2">
-            Local test mode: no accounts exist yet, so the founder code <span className="font-mono text-ink">{founderCode}</span> creates the first one.
-          </p>
-        )}
+
         <label className="block text-sm font-medium text-ink">
           Invite code
           <input
@@ -146,7 +132,7 @@ function JoinForm({ founderCode, onJoined }: { founderCode?: string; onJoined: (
         <label className="flex items-start gap-3 text-sm text-ink">
           <input type="checkbox" checked={discoverable} onChange={(e) => setDiscoverable(e.target.checked)} className="mt-1 size-4 accent-accent" />
           <span>
-            Let friends of friends see me when I&rsquo;m available. <span className="text-ink-3">You can change this later.</span>
+            Let other members find me when I&rsquo;m looking for a chat. <span className="text-ink-3">You can change this later.</span>
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm text-ink">
@@ -165,9 +151,19 @@ function JoinForm({ founderCode, onJoined }: { founderCode?: string; onJoined: (
             ))}
           </div>
         </div>
-        {error && <p className="text-sm text-danger">{error}</p>}
+        <p className="rounded-md bg-surface-2 p-3 text-xs leading-relaxed text-ink-2">
+          This is a private beta. Your messages are stored so you and the other person can come back to them. Other members see your name, never your email.{" "}
+          <Link href="/privacy" className="underline underline-offset-2">
+            Privacy notice
+          </Link>
+        </p>
+        {error && (
+          <p role="alert" className="text-sm text-danger">
+            {error}
+          </p>
+        )}
         <Button size="lg" block loading={busy} onClick={() => void submit()} disabled={!inviteCode.trim() || !displayName.trim()}>
-          Join
+          Join the beta
         </Button>
       </Card>
       <Card title="How it works">
@@ -224,7 +220,7 @@ function Dashboard({ me, refresh }: { me: MeView; refresh: () => void }) {
       refresh();
       void loadSuggestions();
     } catch (e) {
-      setNotice(e instanceof PeopleApiError ? (ERRORS[e.code] ?? `That didn't work (${e.code}).`) : "That didn't work.");
+      setNotice(describeError(e, "That didn't work. Please try again."));
     } finally {
       setBusy(null);
     }
@@ -356,7 +352,7 @@ function Dashboard({ me, refresh }: { me: MeView; refresh: () => void }) {
       )}
 
       <Card title="Invite someone you know">
-        <p className="text-sm text-ink-2">Each code works three times and expires in two weeks. Only invite people you&rsquo;d vouch for.</p>
+        <p className="text-sm text-ink-2">Each code works three times and expires in two weeks. Only invite people you&rsquo;d vouch for, and withdraw a code if it was shared by mistake.</p>
         {newInvite && (
           <div className="flex items-center justify-between rounded-md bg-surface-2 px-3 py-2">
             <span className="font-mono text-ink">{newInvite}</span>
@@ -387,10 +383,15 @@ function Dashboard({ me, refresh }: { me: MeView; refresh: () => void }) {
           Create an invite code
         </Button>
         {me.invitations.length > 0 && (
-          <ul className="text-xs text-ink-3">
+          <ul className="divide-y divide-line">
             {me.invitations.map((i) => (
-              <li key={i.code} className="font-mono">
-                {i.code} · {i.usesLeft} use{i.usesLeft === 1 ? "" : "s"} left
+              <li key={i.code} className="flex items-center justify-between py-1.5 text-sm">
+                <span className="font-mono text-ink">
+                  {i.code} <span className="font-sans text-xs text-ink-3">· {i.usesLeft} use{i.usesLeft === 1 ? "" : "s"} left</span>
+                </span>
+                <Button variant="ghost" size="sm" loading={busy === `withdraw-${i.code}`} onClick={() => void run(`withdraw-${i.code}`, () => peopleApi.revokeInvite(i.code))}>
+                  Withdraw
+                </Button>
               </li>
             ))}
           </ul>
@@ -410,27 +411,36 @@ function Dashboard({ me, refresh }: { me: MeView; refresh: () => void }) {
             </div>
           ))
         )}
-        <p className="text-xs text-ink-3">Only you see this list. Others see at most that you both know someone, with that person&rsquo;s consent.</p>
+        <p className="text-xs text-ink-3">Only you see this list. Others see at most that you both know someone, and only if that person agreed.</p>
       </Card>
 
       <Card title="Privacy">
+        <p className="text-sm text-ink-2">
+          What we store and why is in the{" "}
+          <Link href="/privacy" className="underline underline-offset-2">
+            privacy notice
+          </Link>
+          .
+        </p>
         <label className="flex items-start gap-3 text-sm text-ink">
           <input type="checkbox" checked={me.account.discoverable} onChange={(e) => void run("discoverable", () => peopleApi.updateSettings({ discoverable: e.target.checked }))} className="mt-1 size-4 accent-accent" />
-          <span>Let friends of friends see me when I&rsquo;m available</span>
+          <span>Let other members find me when I&rsquo;m looking for a chat</span>
         </label>
         <label className="flex items-start gap-3 text-sm text-ink">
           <input type="checkbox" checked={me.account.shareAsMutual} onChange={(e) => void run("mutual", () => peopleApi.updateSettings({ shareAsMutual: e.target.checked }))} className="mt-1 size-4 accent-accent" />
           <span>Let two of my connections see &ldquo;You both know {me.account.displayName}&rdquo;</span>
         </label>
         <div className="flex gap-2">
-          <Button variant="ghost" block onClick={() => void run("leave", () => peopleApi.leave())}>
-            Sign out here
+          <Button variant="ghost" block loading={busy === "signout"} onClick={() => void run("signout", () => peopleApi.signOut())}>
+            Sign out
           </Button>
           <Button
             variant="danger"
             block
+            loading={busy === "delete"}
             onClick={() => {
-              if (window.confirm("Delete your account, connections and availability? This cannot be undone.")) void run("delete", () => peopleApi.deleteAccount());
+              if (window.confirm("Delete your account? This removes your profile, connections, invitations and the messages you sent, and signs you out. It can't be undone."))
+                void run("delete", () => peopleApi.deleteAccount());
             }}
           >
             Delete account
@@ -496,8 +506,8 @@ export function PeopleScreen() {
           <UsersRound className="size-5" aria-hidden="true" />
         </span>
         <div>
-          <h1 className="display text-[34px] text-ink">Real people</h1>
-          <p className="text-sm text-ink-3">Invite-only. Separate from the AI demo.</p>
+          <h1 className="display text-[34px] text-ink">Mates</h1>
+          <p className="text-sm text-ink-3">Real people, invite-only. Separate from the AI demo.</p>
         </div>
       </div>
 
@@ -514,13 +524,23 @@ export function PeopleScreen() {
         <DisabledView />
       ) : (
         <>
-          <Card tone="warning">
-            <p className="text-sm leading-relaxed text-ink">
-              <strong>Local test mode.</strong> Accounts, invitations and chats live in this server&rsquo;s memory and reset when it restarts. Identity isn&rsquo;t
-              verified. This exists to try the flow, not to run a community.
-            </p>
-          </Card>
-          {me === undefined ? <p className="text-sm text-ink-3">Loading…</p> : me === null ? <JoinForm founderCode={status.founderCode} onJoined={() => void refresh()} /> : <Dashboard me={me} refresh={() => void refresh()} />}
+          {status.backend === "memory" && (
+            <Card tone="warning">
+              <p className="text-sm leading-relaxed text-ink">
+                <strong>Local test mode.</strong> Accounts and chats live in this server&rsquo;s memory and reset when it restarts. Nobody&rsquo;s identity is
+                checked. For trying the flow only.
+              </p>
+            </Card>
+          )}
+          {status.auth === "supabase" && !status.signedIn ? (
+            <SignIn onSignedIn={() => void refresh()} />
+          ) : !status.joined ? (
+            <JoinForm onJoined={() => void refresh()} />
+          ) : me ? (
+            <Dashboard me={me} refresh={() => void refresh()} />
+          ) : (
+            <p className="text-sm text-ink-3">Loading…</p>
+          )}
         </>
       )}
     </div>

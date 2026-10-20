@@ -122,13 +122,13 @@ export function ProfileScreen() {
             />
           </Card>
 
-          <Card title="Real people">
+          <Card title="Mates">
             <p className="text-sm leading-relaxed text-ink-2">
-              Right now HELLO pairs you with clearly labelled AI characters so you can try it instantly. Real-people mode is invite-only, and nobody
-              is ever swapped for an AI without telling you.
+              Chatting with real people is an invite-only beta. Sign in, manage invites, privacy and your account there. Nobody is ever swapped for an AI without
+              telling you.
             </p>
             <Link href="/people" className="flex items-center justify-between rounded-md bg-surface-2 px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface-3">
-              See how real-people mode works
+              Open Mates
               <ChevronRight className="size-4 text-ink-3" aria-hidden="true" />
             </Link>
           </Card>

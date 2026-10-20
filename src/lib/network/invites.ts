@@ -38,15 +38,16 @@ export function redeemInvitation(
   inv: Invitation,
   inviteeId: AccountId,
   now: number,
-): { ok: true; invitation: Invitation; connection: Connection } | { ok: false; reason: RedeemFailure } {
+): { ok: true; invitation: Invitation; connection: Connection | null } | { ok: false; reason: RedeemFailure } {
   if (inv.revoked) return { ok: false, reason: "revoked" };
   if (inv.expiresAt <= now) return { ok: false, reason: "expired" };
-  if (inv.inviterId === inviteeId) return { ok: false, reason: "self" };
+  if (inv.inviterId !== null && inv.inviterId === inviteeId) return { ok: false, reason: "self" };
   if (inv.redeemedBy.includes(inviteeId)) return { ok: false, reason: "already_redeemed" };
   if (inv.redeemedBy.length >= inv.maxUses) return { ok: false, reason: "exhausted" };
   return {
     ok: true,
     invitation: { ...inv, redeemedBy: [...inv.redeemedBy, inviteeId] },
-    connection: makeConnection(inv.inviterId, inviteeId, now),
+    // A bootstrap invitation from the beta owner has no inviter to connect to.
+    connection: inv.inviterId === null ? null : makeConnection(inv.inviterId, inviteeId, now),
   };
 }

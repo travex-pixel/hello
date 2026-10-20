@@ -1,88 +1,183 @@
-# Real-people mode: what exists, what is simulated, what is missing
+# Mates beta: real people on hello
 
-HELLO's hypothesis is that spontaneous conversations are more likely, and feel
-safer, when both people are genuinely available right now and share a
-verified connection (a friend of a friend). This document is an honest
-inventory of the implementation.
+A private, invite-only beta for about 5 to 20 friends. Members sign in with an
+emailed code, tap **Chat with a mate**, and talk to another member who is
+looking at the same time and accepts. If nobody is free, hello says so and
+offers the AI demo as a separate, clearly labelled choice.
 
-## Status on a default deployment
+This is a concept test, not a public launch. Read "Before going public" at the
+end before inviting strangers.
 
-**Disabled.** `/api/people/status` returns `enabled: false`, the Real people
-screen explains that, and the AI demo is offered as an explicitly optional
-alternative. No AI is ever presented as a person.
+## How it works
 
-## What is implemented and tested
-
-Pure domain logic in `src/lib/network/` (13 unit tests):
-
-- **Graph** — direct connections stored once as undirected edges; indirect
-  reach computed by breadth-first search. Friends-of-friends (degree 2) carry
-  the list of mutual friends that connect the pair; deeper degrees are
-  supported by the model but return no path details.
-- **Path explanation** — `describePath` names a mutual friend only when that
-  person set `shareAsMutual`; everyone else is counted ("Connected through 1
-  person"). No path is ever fabricated: it is derived from stored edges.
-- **Eligibility** — both people must be eligible (email verified, age
-  verified, not suspended), both must have independently switched on
-  availability, neither may have blocked the other, they must not already be
-  direct friends, and there must be a verified two-step path.
-- **Availability** — a 30-minute session that expires on its own
-  (`AVAILABILITY_SESSION_MS`); expired availability is treated as off
-  everywhere.
-- **Invitations** — 8-character codes, 14-day expiry, up to 3 uses; redeeming
-  one creates exactly one direct connection between inviter and invitee and
-  opts nobody into conversations.
-- **Requests** — two-minute window, only the recipient can accept, blocked
-  pairs cannot accept, acceptance creates the conversation and clears both
-  people's availability.
-- **Rate limits** — sliding-window limiter (`src/lib/trust/rate-limit.ts`)
-  applied to joins, invites, requests and messages.
-
-Server layer in `src/lib/network/server/`:
-
-- `NetworkStore` interface and a `MemoryNetworkStore`.
-- HMAC-signed, HttpOnly session cookie.
-- Service functions and `/api/people/*` route handlers that enforce
-  participant-only access to conversations and never return another member's
-  friend list, email, location or contact details.
-
-## Local test mode (`HELLO_HUMAN_MODE=memory`)
-
-Lets you exercise the whole flow with a few browser profiles against one
-`next dev` process:
-
-1. Start the server; it prints a founder invite code (or set
-   `HELLO_FOUNDER_INVITE`). The Real people screen also shows it until the
-   first account exists.
-2. Join as the founder, generate an invite, join as a second person in another
-   browser profile, and so on. Build a chain A–B–C.
-3. A and C switch on "I'm up for a chat"; A sees C as a friend of a friend
-   ("You both know B" if B consented), sends a request, C accepts, both chat.
-
-Everything lives in process memory and resets on restart. Accounts are not
-authenticated beyond the cookie; email and age verification are self-declared.
-This mode exists to validate the experience, not to run a community.
-
-## What production needs (not built)
-
-| Area | Required work |
+| Piece | Implementation |
 |---|---|
-| Accounts | Real authentication (for example Supabase Auth with email magic links), email verification, age assurance appropriate to your jurisdiction |
-| Storage | A Postgres implementation of `NetworkStore`; `supabase/schema.sql` is a starting schema with row-level-security notes |
-| Real-time | Replace polling with Supabase Realtime or WebSockets; push notifications for requests |
-| Availability expiry | A scheduled job or query-time filter (the domain already treats expired rows as off) |
-| Rate limiting | A shared store (Redis or a table) instead of per-process memory |
-| Moderation | A queue for reports, suspension tooling, audit logs, data-retention policy |
-| Privacy | Documented retention, account export and deletion flows, no contact import |
-| Trust | A mutual friend is context, not a guarantee. The UI says so; the product should keep saying so |
+| Sign-in | Supabase Auth, six-digit email codes, HttpOnly session cookies |
+| Data | Supabase Postgres, private `hello` schema created automatically on first use |
+| Access | Every request is authorised on the server from the session; the browser never sends an account id that grants access |
+| Browser keys | Can't read anything: the schema isn't exposed by Supabase's API, row-level security is on with no policies, and the public roles have no grants |
+| Matching | Any available member of the beta ("community"). Set `HELLO_DISCOVERY=friends_of_friends` to restrict to two-step paths |
+| Consent | One person asks, the other must accept within two minutes |
+| Availability | On while you're looking, off when you stop, start a chat, choose AI, or after 30 minutes |
+| Messages | Ordered by a server sequence number; each send carries a client id so retries never duplicate; polled every 2.5 s (6 s when idle) |
+| Races | Accepting, joining with an invite and sending are each one atomic database operation; a unique index allows one open conversation per pair |
+| Rate limits | Stored in the database, so they hold across all server instances |
 
-## Measurement plan for the hypothesis
+Why "community" rather than friends-of-friends: in a group of mates most
+people already know each other directly, and friends-of-friends deliberately
+excludes direct friends, so almost nobody would ever be matched. "You both
+know Sarah" still appears when it applies and Sarah agreed to be named.
 
-Events to add once real accounts exist (the AI demo already has the equivalent
-funnel in `src/lib/analytics/`): invites sent and redeemed, availability
-sessions started and their length, suggestions shown per session, requests
-sent, accepted, declined and expired, conversations reaching five messages,
-blocks and reports per hundred conversations, and return availability within
-seven days. The question to answer is whether friends-of-friends plus mutual
-availability yields enough eligible people and enough accepted requests to be
-worth the invite friction.
+## Set it up (about 20 minutes, $0)
+
+You need a free Supabase account and the Vercel project you already have.
+
+### 1. Create the Supabase project
+
+1. Go to supabase.com, sign in with GitHub, and create a **New project**. Pick
+   the region closest to your friends and save the database password.
+2. **Authentication → Sign In / Providers → Email**: make sure Email is
+   enabled.
+
+### 2. Make the email show a code
+
+Supabase emails a link by default; hello needs the code.
+
+**Authentication → Emails → Templates.** In both **Magic link** and **Confirm
+signup**, replace the body with:
+
+```html
+<h2>Your hello sign-in code</h2>
+<p>Enter this code in hello: <strong>{{ .Token }}</strong></p>
+<p>If you didn't ask for it, you can ignore this email.</p>
+```
+
+### 3. Set up an email sender (required for more than a couple of people)
+
+Supabase's built-in sender only delivers to your own team's addresses and
+about two emails an hour. Use your Gmail instead, free:
+
+1. In your Google account, turn on **2-Step Verification**, then create an
+   **App password** (search "App passwords" in Google account settings).
+2. **Authentication → Emails → SMTP Settings**: enable custom SMTP.
+   Host `smtp.gmail.com`, port `465`, username your Gmail address, password the
+   app password, sender email your Gmail address, sender name `hello`.
+3. **Authentication → Rate Limits**: raise emails per hour to about 30.
+
+Codes will come from your Gmail address. Gmail allows around 500 a day.
+
+### 4. Copy four values from Supabase
+
+| Vercel variable | Where in Supabase |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API Keys → publishable (or anon) key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API Keys → secret (or service_role) key. Server only, never share it |
+| `DATABASE_URL` | **Connect** button → Transaction pooler connection string (port 6543), with your password filled in |
+
+### 5. Add them to Vercel
+
+Vercel → your project → **Settings → Environment Variables**, for
+Production:
+
+```
+HELLO_HUMAN_MODE=supabase
+DATABASE_URL=...
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+Optional: `HELLO_CONTACT_EMAIL` (shown in the privacy notice),
+`NEXT_PUBLIC_HELLO_MATE_WAIT_SECONDS` (default 45), `DATABASE_CA_CERT` (the
+certificate from Database Settings → SSL, to verify the database server as
+well as encrypt).
+
+Then **Deployments → ⋯ → Redeploy**. Variables starting with `NEXT_PUBLIC_`
+only take effect after a redeploy.
+
+### 6. Let yourself in
+
+1. Open your hello link once (this creates the database tables).
+2. Supabase → **SQL Editor**, run:
+   ```sql
+   select hello.create_bootstrap_invite();
+   ```
+   It returns a one-use code like `8D89-55F6`.
+3. In hello, open **Your mates and invites** (or tap Chat with a mate), sign in
+   with your email, and join with that code.
+4. On the Mates screen, **Create an invite code** for each friend (each works
+   three times, expires in 14 days, and can be withdrawn).
+
+## Reviewing reports
+
+Reports store who, when and a short reason, never message content.
+
+```sql
+-- Open reports, newest first
+select r.created_at, r.reason, reporter.display_name as reporter, reported.display_name as reported, r.id, r.reported_id
+from hello.reports r
+left join hello.accounts reporter on reporter.id = r.reporter_id
+left join hello.accounts reported on reported.id = r.reported_id
+where r.status = 'open'
+order by r.created_at desc;
+
+-- Suspend someone: they can't match, chat or be found
+update hello.accounts set suspended = true where id = 'acc_...';
+
+-- Mark a report handled
+update hello.reports set status = 'reviewed' where id = 'rep_...';
+```
+
+Check reports at least every few days during the beta and reply to the
+reporter (the privacy notice tells members how to reach you). Delete reports
+older than six months, as the privacy notice promises:
+
+```sql
+delete from hello.reports where created_at < (extract(epoch from now() - interval '6 months') * 1000);
+```
+
+## Costs and limits
+
+| Item | Cost | Watch out for |
+|---|---|---|
+| Supabase free plan | $0 | Pauses after 7 days with no activity; restore it from the dashboard |
+| Gmail SMTP | $0 | About 500 emails a day |
+| Vercel Hobby | $0 | Polling uses function calls. 20 people chatting an hour a day is roughly 1 million calls a month, near the free limit; chats slow their polling when idle |
+
+## Verified locally
+
+Against a local Supabase (Postgres, auth server and test mailbox) with
+separate browser profiles: emailed-code sign-in, invite joins, used-up invite
+refused, mate matching with consent, messages on both devices, persistence
+after a server restart, the conversation listed under Chats, duplicate sends
+stored once, non-participant and signed-out access refused, cross-site posts
+refused, honest failed-send and retry, blocking ending the chat and preventing
+re-matching, the AI offer after the wait, AI chat working, account deletion
+removing the profile and sign-in email, and the public Supabase API unable to
+read the data. The service tests also run every rule against PGlite and real
+Postgres, including concurrent accepts and invite redemptions.
+
+## Local development
+
+- `HELLO_HUMAN_MODE=memory` with `HELLO_FOUNDER_INVITE=TEST-CODE`: single
+  process, no email, throwaway identities. Refused on a Vercel production
+  deployment.
+- Real flow locally: run `npx supabase start` and point the variables above at
+  it; codes appear in the local mailbox at http://127.0.0.1:54324.
+- `TEST_DATABASE_URL=postgresql://... npm test` adds the real-Postgres run of
+  the service tests.
+
+## Deferred on purpose
+
+- Live push (polling is reliable at this size).
+- Notifications when someone wants to chat while you're not on the app.
+- Age verification beyond a self-declared checkbox, and identity checks.
+- A moderation dashboard (SQL above is enough for a friends beta).
+
+## Before going public
+
+Public use needs at least: age assurance appropriate to your country, a proper
+privacy policy and terms, a moderation workflow and staffing, abuse
+detection, push notifications, a paid email provider, automated report
+retention, backups and monitoring, and a security review.

@@ -1,11 +1,14 @@
-import { peopleRoute, requireAccount } from "@/lib/network/server/http";
+import { peopleRoute } from "@/lib/network/server/http";
 import { deleteAccount } from "@/lib/network/server/service";
-import { clearSessionCookie } from "@/lib/network/server/session";
 
-/** Delete the account, its connections and availability. */
-export const POST = peopleRoute(async (request) => {
-  const account = requireAccount(request);
-  if (account instanceof Response) return account;
+/**
+ * Deletes the member's account and personal data, then their sign-in
+ * (email address) from the auth provider, then signs them out.
+ */
+export const POST = peopleRoute(async (_request, _ctx, h) => {
+  const account = await h.member();
   await deleteAccount(account);
-  return Response.json({ ok: true }, { headers: { "set-cookie": clearSessionCookie() } });
+  const authRemoved = await h.auth.deleteUser(account.authUserId);
+  await h.auth.signOut();
+  return Response.json({ ok: true, authRemoved });
 });

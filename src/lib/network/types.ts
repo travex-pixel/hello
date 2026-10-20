@@ -8,13 +8,22 @@ import type { TopicId } from "@/lib/characters/topics";
  */
 export type AccountId = string;
 
+/**
+ * Who can be suggested. "community": any available member of the invite-only
+ * beta (the right default for a group of mates, who mostly know each other
+ * directly). "friends_of_friends": only people exactly two steps away.
+ */
+export type DiscoveryScope = "community" | "friends_of_friends";
+
 export interface Account {
   id: AccountId;
+  /** Identity from the auth provider (Supabase user id, or a dev identity locally). */
+  authUserId: string;
   displayName: string;
   createdAt: number;
-  /** Set by a real verification flow in production; local test mode sets it on join. */
+  /** True when the auth provider verified email ownership. Not proof of real-world identity. */
   emailVerified: boolean;
-  /** Self-declared in local test mode; production needs a stronger check. */
+  /** Self-declared "18 or over". Not verified. */
   ageVerified: boolean;
   suspended: boolean;
   /** Whether friends of friends may see this person in discovery at all. */
@@ -28,7 +37,8 @@ export interface Account {
 
 export interface Invitation {
   code: string;
-  inviterId: AccountId;
+  /** Null for a bootstrap invitation created by the beta owner. */
+  inviterId: AccountId | null;
   createdAt: number;
   expiresAt: number;
   maxUses: number;
@@ -67,7 +77,12 @@ export interface ConversationRequest {
 
 export interface HumanMessage {
   id: string;
+  /** Server-assigned, strictly increasing: the order of record and the polling cursor. */
+  seq: number;
+  conversationId: string;
   senderId: AccountId;
+  /** Client-generated key so a retried send never creates a duplicate. */
+  clientId: string;
   text: string;
   ts: number;
 }
@@ -79,7 +94,11 @@ export interface HumanConversation {
   startedAt: number;
   endedAt?: number;
   endedBy?: AccountId;
-  messages: HumanMessage[];
+}
+
+/** Stable key for "these two people", independent of order. */
+export function pairKey(a: AccountId, b: AccountId): string {
+  return a < b ? `${a}|${b}` : `${b}|${a}`;
 }
 
 export interface Block {
@@ -95,6 +114,7 @@ export interface NetworkReport {
   conversationId?: string;
   reason: string;
   createdAt: number;
+  status: "open" | "reviewed";
 }
 
 /** Everything discovery needs, loaded for one viewer. */
@@ -109,6 +129,7 @@ export interface GraphSnapshot {
 export interface Suggestion {
   accountId: AccountId;
   displayName: string;
+  /** 1 direct, 2 friend of a friend, 0 no path within two steps (community scope only). */
   degree: number;
   /** Privacy-preserving explanation, e.g. "You both know Sarah" or "Connected through 1 person". */
   pathContext: string;

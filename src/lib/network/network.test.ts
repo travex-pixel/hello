@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { AVAILABILITY_SESSION_MS, discoveryRefusal } from "./eligibility";
 import { discoverPeople } from "./discovery";
+import { pairKey } from "./types";
 import { describePath, makeConnection, reachFrom } from "./graph";
 import { createInvitation, normalizeInviteCode, redeemInvitation } from "./invites";
 import { acceptRequest, createRequest } from "./requests";
@@ -11,6 +12,7 @@ const NOW = 1_000_000;
 function account(id: string, patch: Partial<Account> = {}): Account {
   return {
     id,
+    authUserId: `auth_${id}`,
     displayName: id[0].toUpperCase() + id.slice(1),
     createdAt: 0,
     emailVerified: true,
@@ -120,6 +122,41 @@ describe("discovery", () => {
   });
 });
 
+describe("community scope (mates beta)", () => {
+  it("lets any available member find any other, including direct friends", () => {
+    const ids = discoverPeople(graph(), "me", "bored", NOW, "community").map((s) => s.accountId).sort();
+    expect(ids).toEqual(["ben", "priya", "sarah", "zoe"]);
+  });
+
+  it("gives honest context for each kind of path", () => {
+    const byId = Object.fromEntries(discoverPeople(graph(), "me", "bored", NOW, "community").map((s) => [s.accountId, s.pathContext]));
+    expect(byId.sarah).toBe("You're already connected");
+    expect(byId.priya).toMatch(/You both know/);
+    expect(byId.zoe).toBe("In the hello beta");
+  });
+
+  it("still excludes blocked, unavailable, ineligible and undiscoverable people", () => {
+    const g = graph();
+    g.blocks.push({ blockerId: "zoe", blockedId: "me", createdAt: 0 });
+    g.availability.delete("sarah");
+    g.accounts.get("ben")!.suspended = true;
+    g.accounts.get("priya")!.discoverable = false;
+    expect(discoverPeople(g, "me", "bored", NOW, "community")).toEqual([]);
+  });
+
+  it("puts whoever has waited longest first", () => {
+    const g = graph();
+    g.availability.set("zoe", available("zoe", "bored", NOW - 20_000));
+    g.availability.set("ben", available("ben", "bored", NOW - 5_000));
+    const order = discoverPeople(g, "me", "bored", NOW, "community").map((s) => s.accountId);
+    expect(order.indexOf("zoe")).toBeLessThan(order.indexOf("ben"));
+  });
+
+  it("builds an order-independent pair key", () => {
+    expect(pairKey("b", "a")).toBe(pairKey("a", "b"));
+  });
+});
+
 describe("invitations", () => {
   it("creates a single direct connection on redemption and enforces limits", () => {
     const inv = createInvitation("sarah", NOW, { maxUses: 1, random: () => 0.5 });
@@ -131,6 +168,12 @@ describe("invitations", () => {
     expect(redeemInvitation(inv, "sarah", NOW + 2)).toEqual({ ok: false, reason: "self" });
     expect(redeemInvitation({ ...inv, revoked: true }, "x", NOW)).toEqual({ ok: false, reason: "revoked" });
     expect(redeemInvitation(inv, "x", inv.expiresAt + 1)).toEqual({ ok: false, reason: "expired" });
+  });
+
+  it("supports bootstrap invitations with no inviter", () => {
+    const inv = { ...createInvitation("x", NOW, { maxUses: 1 }), inviterId: null };
+    const r = redeemInvitation(inv, "first", NOW + 1);
+    expect(r.ok && r.connection).toBe(null);
   });
 
   it("normalises codes", () => {

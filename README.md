@@ -39,11 +39,11 @@ browser and your conversations stay on your device.
   referrers and devices, with no cookies. Chats are grouped under `/chat/[id]`,
   so visitors to that route are people who started a conversation. Custom events
   need a Vercel Pro plan, so per-mode and per-message counts are not sent.
-- **Real-people mode foundations**: a tested social-graph domain (invitations,
-  direct connections, friends-of-friends discovery with consented "You both
-  know Sarah" context, self-expiring availability, mutual acceptance, blocks,
-  reports, rate limits), API routes, and a local test store. Disabled by
-  default and honest about it. See [docs/HUMAN_MODE.md](docs/HUMAN_MODE.md).
+- **Mates beta (real people, invite-only).** Email sign-in codes, invite
+  codes, "Chat with a mate" with mutual consent, persistent messages, block,
+  report, account deletion and a privacy notice, on Supabase. Off by default;
+  when nobody is free, AI is offered as a separate choice, never swapped in.
+  Setup in [docs/HUMAN_MODE.md](docs/HUMAN_MODE.md).
 
 ## Design
 
@@ -63,7 +63,7 @@ icons and share image. Every text colour pairing meets WCAG AA contrast.
 | `npm start` | Serve the production build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript |
-| `npm test` | Vitest unit tests (engine, matching, analytics, network, rate limiting) |
+| `npm test` | Vitest: engine, matching, analytics, network rules, and the mates service on memory and PGlite (add `TEST_DATABASE_URL` for real Postgres) |
 | `npm run transcript` | Writes sample conversations for every character and mode to `transcript.txt` |
 
 ## Optional configuration
@@ -74,9 +74,9 @@ Copy `.env.example` to `.env.local` and uncomment what you need.
   `ANTHROPIC_API_KEY` and `NEXT_PUBLIC_HELLO_AI_MODE=server`. The browser calls
   `/api/chat`; the key never leaves the server; any failure falls back to the
   local engine.
-- **Real-people local test mode.** Set `HELLO_HUMAN_MODE=memory`. Accounts and
-  chats live in the server process and reset on restart. The server log prints
-  a founder invite code for the first account.
+- **Mates beta.** Set `HELLO_HUMAN_MODE=supabase` plus four Supabase values.
+  Step-by-step setup, including the free email sender and how to review
+  reports, is in [docs/HUMAN_MODE.md](docs/HUMAN_MODE.md).
 
 ## Project layout
 
@@ -89,10 +89,10 @@ src/lib/matching        explainable character matching for the three modes
 src/lib/ai              provider interface, local provider, server adapter, persona prompt
 src/lib/conversation    persisted store for demo conversations
 src/lib/analytics       event names, local tracking, funnel computation
-src/lib/network         real-people domain: graph, eligibility, invites, requests (+ server/)
+src/lib/network         real-people domain: graph, eligibility, invites, requests
+src/lib/network/server  store (Postgres + memory), schema, auth, service, HTTP wrapper
 src/lib/trust           rate limiting
 docs                    DEMO_MODE.md, HUMAN_MODE.md
-supabase/schema.sql     starting Postgres schema for real-people mode
 ```
 
 ## Honesty notes
@@ -100,5 +100,6 @@ supabase/schema.sql     starting Postgres schema for real-people mode
 - AI characters are labelled everywhere they appear and say so when asked.
 - Real people are never substituted with an AI. When nobody is available the
   app says so and offers the AI demo as an optional alternative.
+- Real conversations start only when the other person accepts.
 - No testimonials, no invented metrics. The funnel only counts what happened in
   your browser.

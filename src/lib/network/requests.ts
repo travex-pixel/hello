@@ -1,5 +1,5 @@
 import type { Mode } from "@/lib/characters/types";
-import type { AccountId, ConversationRequest, GraphSnapshot, HumanConversation } from "./types";
+import type { AccountId, ConversationRequest, DiscoveryScope, GraphSnapshot, HumanConversation } from "./types";
 import { REQUEST_TTL_MS, discoveryRefusal, type DiscoveryRefusal } from "./eligibility";
 
 export function createRequest(
@@ -9,8 +9,9 @@ export function createRequest(
   toId: AccountId,
   mode: Mode,
   now: number,
+  scope: DiscoveryScope = "friends_of_friends",
 ): { ok: true; request: ConversationRequest } | { ok: false; reason: DiscoveryRefusal } {
-  const refusal = discoveryRefusal(graph, fromId, toId, now);
+  const refusal = discoveryRefusal(graph, fromId, toId, now, scope);
   if (refusal) return { ok: false, reason: refusal };
   return {
     ok: true,
@@ -37,7 +38,7 @@ export function acceptRequest(
   return {
     ok: true,
     request: { ...req, status: "accepted", conversationId },
-    conversation: { id: conversationId, participants: [req.fromId, req.toId], mode: req.mode, startedAt: now, messages: [] },
+    conversation: { id: conversationId, participants: [req.fromId, req.toId], mode: req.mode, startedAt: now },
   };
 }
 
