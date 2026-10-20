@@ -35,6 +35,10 @@ browser and your conversations stay on your device.
 - **Privacy-conscious analytics** stored locally: a funnel from landing to first
   tap, connection, first message, reply, five messages, feedback and return
   visit. In development, `/dev/funnel` shows it.
+- **Vercel Web Analytics** for the deployed site: anonymous visitors, page views,
+  referrers and devices, with no cookies. Chats are grouped under `/chat/[id]`,
+  so visitors to that route are people who started a conversation. Custom events
+  need a Vercel Pro plan, so per-mode and per-message counts are not sent.
 - **Real-people mode foundations**: a tested social-graph domain (invitations,
   direct connections, friends-of-friends discovery with consented "You both
   know Sarah" context, self-expiring availability, mutual acceptance, blocks,

@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/shell/AppShell";
@@ -62,6 +64,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <div className="ambient" aria-hidden="true" />
         <AppShell>{children}</AppShell>
+        {/*
+          Vercel Web Analytics: anonymous visitors and page views, no cookies.
+          It reads the URL, so it sits in Suspense to keep pages prerenderable.
+          Routes are grouped, so every chat counts under /chat/[id].
+        */}
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
       </body>
     </html>
   );
