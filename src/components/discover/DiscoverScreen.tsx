@@ -19,13 +19,18 @@ import { MatePanel } from "./MatePanel";
 import { useMateMatch } from "./useMateMatch";
 import { peopleApi, type StatusView } from "@/components/people/api";
 
+/** A small live dot. Only ever placed next to a statement that is true from real data. */
+function StatusDot({ className = "bg-mint-ink" }: { className?: string }) {
+  return <span className={`size-2 shrink-0 rounded-full animate-pulse-dot ${className}`} aria-hidden="true" />;
+}
+
 export function DiscoverScreen() {
   const reduce = useReducedMotion();
   const mode = useHello((s) => s.mode);
   const setMode = useHello((s) => s.setMode);
   const blocked = useHello((s) => s.blockedCharacterIds);
   const unblock = useHello((s) => s.unblockCharacter);
-  const { state, start, tryAnother, accept, reset } = useDiscovery();
+  const { state, error, start, tryAnother, accept, reset } = useDiscovery();
   const router = useRouter();
   const mate = useMateMatch(mode);
   const [people, setPeople] = useState<StatusView | null>(null);
@@ -58,6 +63,7 @@ export function DiscoverScreen() {
 
   /** Primary action. With real-people mode on it looks for a mate; otherwise it's the AI demo. */
   const onPrimary = () => {
+    if (searching) return;
     if (!humans) return void start();
     if (!people?.joined) return router.push("/people");
     track("discovery_tapped", { mode, source: "human" });
@@ -76,45 +82,49 @@ export function DiscoverScreen() {
     transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] as const },
   };
 
+  const mateCount = (people?.joined && people.availableNow) || 0;
+
   return (
-    <div className="flex flex-1 flex-col px-5 pt-[calc(var(--safe-top)+14px)]">
+    <div className="flex flex-1 flex-col px-5 pt-[calc(var(--safe-top)+12px)]">
       <header className="flex items-center justify-between">
-        <Wordmark />
-        <Link href="/profile" aria-label="Profile and settings" className="-mr-2">
-          <IconButton label="Profile and settings" tabIndex={-1} className="pointer-events-none">
+        <Wordmark size="sm" />
+        <Link href="/profile" aria-label="Profile and settings" className="-mr-2 rounded-full">
+          <IconButton label="Profile and settings" tone="subtle" tabIndex={-1} className="pointer-events-none">
             <Settings2 className="size-5" />
           </IconButton>
         </Link>
       </header>
 
-      <section className="flex flex-1 flex-col items-center justify-center py-4 text-center sm:py-6">
+      <section className="flex flex-1 flex-col items-center justify-center py-5 text-center short:py-3 sm:py-4">
         <AnimatePresence mode="wait" initial={false}>
           {(state.status === "idle" || state.status === "searching") && (
             <motion.div key="hero" {...fade} className="flex w-full flex-col items-center">
-              <h1 className="display text-[38px] leading-[1.02] text-ink sm:text-[48px]">
-                Meet someone new.
-                <br />
-                <span className="text-accent">In one tap.</span>
+              <h1 className="display text-balance text-[clamp(32px,9.4vw,46px)] leading-[1.02] text-ink short:text-[30px]">
+                Meet someone interesting<span className="text-accent">.</span>
               </h1>
-              <p className="mt-4 text-[16px] text-ink-2">You don&rsquo;t need a reason to say hello.</p>
+              <p className="mt-3 max-w-[32ch] text-balance text-[16px] leading-snug text-ink-2 short:mt-2 short:text-[15px]">A good conversation can start with anyone.</p>
 
-              <div className="mt-7 w-full max-w-[380px]">
+              <div className="mt-7 w-full max-w-[400px] short:mt-5">
                 <ModeSelector value={mode} onChange={setMode} disabled={searching || lookingForMate} />
               </div>
 
               {lookingForMate && mate.view.phase === "looking" && (mate.view.timedOut || mate.view.match?.state === "incoming") ? (
-                <div className="mt-7 w-full">
+                <div className="mt-6 w-full">
                   <MatePanel view={mate.view} onStop={mate.stop} onKeepLooking={mate.keepLooking} onChooseAI={chooseAI} onRespond={(id, action) => void mate.respond(id, action)} />
                 </div>
               ) : (
-                <div className="my-9">
-                  <ConnectButton searching={searching} onPress={onPrimary} label={humans ? "Chat with a mate" : "Say hello"} />
+                <div className="my-8 short:my-5 sm:my-9">
+                  <ConnectButton searching={searching} onPress={onPrimary} busyLabel={mateBusy ? "Looking for a mate" : "Finding someone"} />
                 </div>
               )}
 
-              <div className="min-h-[52px]" aria-live="polite">
+              <div className="min-h-[56px] w-full short:min-h-[48px]" aria-live="polite">
                 <AnimatePresence mode="wait" initial={false}>
-                  {lookingForMate && mate.view.phase === "looking" ? (
+                  {error && !searching ? (
+                    <motion.p key="error" {...fade} role="status" className="mx-auto max-w-[34ch] text-sm font-medium text-warning">
+                      {error}
+                    </motion.p>
+                  ) : lookingForMate && mate.view.phase === "looking" ? (
                     !mate.view.timedOut && mate.view.match?.state !== "incoming" ? (
                       <motion.div key="mate" {...fade}>
                         <MatePanel view={mate.view} onStop={mate.stop} onKeepLooking={mate.keepLooking} onChooseAI={chooseAI} onRespond={(id, action) => void mate.respond(id, action)} />
@@ -122,15 +132,15 @@ export function DiscoverScreen() {
                     ) : null
                   ) : humans && !searching ? (
                     <motion.div key="human-blurb" {...fade} className="flex flex-col items-center">
-                      <p className="text-[16px] font-medium text-ink">
+                      <p className="text-[15px] font-medium text-ink">
                         {!people?.joined
-                          ? "Real people from the invite-only beta."
-                          : people.availableNow
-                            ? `${people.availableNow} ${people.availableNow === 1 ? "mate is" : "mates are"} looking for a chat now.`
-                            : "Real people from the beta. Nobody's looking right now."}
+                          ? "Sign in to look for a mate from the invite-only beta."
+                          : mateCount
+                            ? `${mateCount} ${mateCount === 1 ? "mate is" : "mates are"} looking for a chat right now.`
+                            : "Nobody from the beta is looking right now. Tap and you'll be visible for a while."}
                       </p>
                       <Button variant="ghost" className="mt-1" onClick={() => void start()}>
-                        Chat with AI instead
+                        Chat with an AI character instead
                       </Button>
                     </motion.div>
                   ) : searching ? (
@@ -140,8 +150,8 @@ export function DiscoverScreen() {
                     </motion.div>
                   ) : (
                     <motion.div key="blurb" {...fade}>
-                      <p className="text-[16px] font-medium text-ink">{copy.blurb}</p>
-                      <p className="mt-1.5 text-sm text-ink-3">There&rsquo;s always a new conversation to discover.</p>
+                      <p className="text-[15px] font-medium text-ink">{copy.blurb}</p>
+                      <p className="mt-1.5 text-sm text-ink-3">You&rsquo;ll meet an AI character, clearly labelled. No sign&#8209;up.</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -152,7 +162,7 @@ export function DiscoverScreen() {
           {(state.status === "found" || state.status === "connecting") && (
             <motion.div key="match" {...fade} className="w-full">
               <p className="mb-2.5 text-[13px] font-semibold uppercase tracking-[0.2em] text-accent">Someone to meet</p>
-              <MatchCard match={state.match} connecting={state.status === "connecting"} onAccept={() => void accept()} onDecline={tryAnother} />
+              <MatchCard match={state.match} connecting={state.status === "connecting"} error={error} onAccept={() => void accept()} onDecline={tryAnother} />
             </motion.div>
           )}
 
@@ -179,10 +189,21 @@ export function DiscoverScreen() {
         </AnimatePresence>
       </section>
 
-      <footer className="pb-4 text-center text-xs text-ink-3">
-        <p className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-mint-ink" aria-hidden="true" />
-          AI demo partners available
+      <footer className="pb-4 text-center text-xs text-ink-3 short:pb-3">
+        <p className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+          {mateCount > 0 ? (
+            <>
+              <StatusDot />
+              <span className="text-mint-ink">
+                {mateCount} {mateCount === 1 ? "mate" : "mates"} available now
+              </span>
+            </>
+          ) : (
+            <>
+              <StatusDot />
+              AI demo partners available
+            </>
+          )}
           <span aria-hidden="true">·</span>
           <Link href="/how-it-works" className="text-ink-2 underline-offset-4 hover:underline">
             How it works

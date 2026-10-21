@@ -1,43 +1,48 @@
 @import "tailwindcss";
 
+/* Short viewports (older small phones, landscape): tighter vertical rhythm on Discover. */
+@custom-variant short (@media (max-height: 640px));
+
 /*
   hello design tokens.
-  Warm paper, deep charcoal, one vermilion for the thing that matters on a
-  screen, cobalt for the person's own voice, a touch of mint for "available".
-  Light only: the product is a warm daytime object, not a dashboard.
+  Deep midnight navy, one coral for the thing that matters on a screen,
+  electric blue for the person's own voice and for information, mint for
+  "available". Dark only: the product is a quiet evening object, not a
+  dashboard. Every text pairing below meets WCAG AA (see scripts in docs).
 */
 @theme {
-  --color-bg: #fbf7f0;
-  --color-bg-elevated: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-2: #f3ede3;
-  --color-surface-3: #e9e1d4;
-  --color-line: rgba(28, 25, 20, 0.1);
-  --color-line-strong: rgba(28, 25, 20, 0.2);
+  --color-bg: #080d19;
+  --color-bg-elevated: #111827;
+  --color-surface: #111827;
+  --color-surface-2: #182236;
+  --color-surface-3: #1f2b42;
+  --color-line: #27334a;
+  --color-line-strong: #36466a;
 
-  --color-ink: #1b1917;
-  --color-ink-2: #5a554e;
-  --color-ink-3: #736c62;
-  --color-ink-inverse: #fbf7f0;
+  --color-ink: #f7f7fb;
+  --color-ink-2: #9aa8c4;
+  --color-ink-3: #8593b0;
+  --color-ink-inverse: #080d19;
 
-  --color-accent: #c93a18;
-  --color-accent-strong: #b9341a;
-  --color-accent-deep: #a62c12;
-  --color-accent-soft: #fce6de;
-  --color-coral: #f2552c;
-  --color-coral-light: #ff8a66;
-  --color-accent-glow: rgba(242, 85, 44, 0.45);
+  --color-accent: #ff6b57;
+  --color-accent-strong: #ff8270;
+  --color-accent-deep: #ef5945;
+  --color-accent-soft: rgba(255, 107, 87, 0.14);
+  --color-coral: #ff6b57;
+  --color-coral-light: #ffa08f;
+  --color-accent-glow: rgba(255, 107, 87, 0.45);
 
-  --color-cobalt: #1e3fd9;
-  --color-cobalt-deep: #1734b0;
-  --color-cobalt-soft: #e4e9fb;
+  --color-cobalt: #477bff;
+  --color-cobalt-deep: #2e5cdc;
+  --color-cobalt-soft: rgba(71, 123, 255, 0.16);
+  --color-cobalt-light: #9ab6ff;
 
-  --color-mint: #cdefd9;
-  --color-mint-ink: #176b42;
+  --color-mint: rgba(98, 230, 181, 0.16);
+  --color-mint-ink: #62e6b5;
 
-  --color-success: #1d7a4c;
-  --color-warning: #9a6412;
-  --color-danger: #c9321f;
+  --color-success: #62e6b5;
+  --color-warning: #f5b85a;
+  --color-danger: #ff7a7a;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
@@ -49,26 +54,29 @@
   --radius-lg: 22px;
   --radius-xl: 28px;
 
-  --shadow-soft: 0 1px 2px rgba(28, 25, 20, 0.06), 0 10px 30px -18px rgba(28, 25, 20, 0.35);
-  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 1px 2px rgba(28, 25, 20, 0.05), 0 24px 60px -32px rgba(28, 25, 20, 0.4);
-  --shadow-sheet: 0 -8px 40px -16px rgba(28, 25, 20, 0.35);
-  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 10px 24px -14px rgba(201, 58, 24, 0.75);
-  --shadow-orb: 0 2px 0 rgba(255, 255, 255, 0.35) inset, 0 -10px 30px rgba(166, 44, 18, 0.35) inset, 0 30px 70px -28px rgba(242, 85, 44, 0.75);
+  /* On a dark ground, edges come from a hairline ring, not a drop shadow. */
+  --shadow-soft: 0 0 0 1px #27334a, 0 8px 24px -16px rgba(0, 0, 0, 0.7);
+  --shadow-card: 0 0 0 1px #27334a, 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 24px 60px -36px rgba(0, 0, 0, 0.9);
+  --shadow-sheet: 0 0 0 1px #27334a, 0 -12px 48px -16px rgba(0, 0, 0, 0.8);
+  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 10px 28px -12px rgba(255, 107, 87, 0.6);
+  --shadow-orb: 0 2px 0 rgba(255, 255, 255, 0.28) inset, 0 -14px 36px rgba(176, 52, 34, 0.45) inset, 0 34px 90px -26px rgba(255, 107, 87, 0.7);
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
 
   --animate-breathe: breathe 4.2s ease-in-out infinite;
   --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+  --animate-spark: spark 3.6s ease-in-out infinite;
 
   @keyframes breathe {
     0%,
     100% {
-      opacity: 0.55;
+      opacity: 0.5;
       transform: scale(0.96);
     }
     50% {
-      opacity: 0.9;
+      opacity: 0.85;
       transform: scale(1.04);
     }
   }
@@ -84,13 +92,45 @@
       transform: translateY(-2px);
     }
   }
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(98, 230, 181, 0.45);
+    }
+    60% {
+      box-shadow: 0 0 0 6px rgba(98, 230, 181, 0);
+    }
+  }
+  @keyframes spark {
+    0%,
+    100% {
+      opacity: 0.15;
+      transform: scale(0.6);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1);
+    }
+  }
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --nav-height: 64px;
+  /* The big button. Shrinks on short viewports so it never pushes the nav off. */
+  --orb: clamp(188px, 56vw, 244px);
+}
+@media (max-height: 720px) {
+  :root {
+    --orb: clamp(168px, 48vw, 208px);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --orb: 160px;
+  }
 }
 
 html {
@@ -119,33 +159,48 @@ body {
   font-weight: 500;
 }
 
-/* One quiet, warm light source. Fixed so it never shifts under content. */
+/* One warm light source behind the button, a cool one low on the left. Fixed so it never shifts under content. */
 .ambient {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(55% 40% at 50% 28%, rgba(242, 85, 44, 0.14), transparent 70%),
-    radial-gradient(35% 28% at 15% 95%, rgba(30, 63, 217, 0.06), transparent 70%);
+    radial-gradient(60% 42% at 50% 34%, rgba(255, 107, 87, 0.16), transparent 70%),
+    radial-gradient(40% 30% at 12% 96%, rgba(71, 123, 255, 0.12), transparent 70%),
+    radial-gradient(30% 24% at 92% 6%, rgba(98, 230, 181, 0.05), transparent 70%);
 }
 
 *:focus {
   outline: none;
 }
+/* The outline follows each element's own corner radius, so round buttons stay round. */
 *:focus-visible {
   outline: 2px solid var(--color-cobalt);
   outline-offset: 2px;
-  border-radius: var(--radius-xs);
+}
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--color-cobalt);
+  box-shadow: 0 0 0 3px var(--color-cobalt-soft);
+}
+/* The big Discover button: a wider ring, offset from the glowing disc. */
+.orb-button:focus-visible {
+  outline-width: 3px;
+  outline-offset: 6px;
 }
 
 ::selection {
-  background: rgba(242, 85, 44, 0.22);
+  background: rgba(255, 107, 87, 0.35);
 }
 
 textarea,
 input {
   font: inherit;
+}
+input[type="checkbox"] {
+  accent-color: var(--color-accent);
 }
 
 .scrollbar-none {

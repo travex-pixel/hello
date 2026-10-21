@@ -45,7 +45,7 @@ export function Sheet({ open, onClose, title, children, dismissable = true, clas
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <motion.div
-            className="absolute inset-0 bg-ink/45"
+            className="absolute inset-0 bg-black/60"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -68,7 +68,7 @@ export function Sheet({ open, onClose, title, children, dismissable = true, clas
               className,
             )}
           >
-            <div aria-hidden="true" className="mx-auto mb-3 h-1 w-10 rounded-full bg-surface-3 sm:hidden" />
+            <div aria-hidden="true" className="mx-auto mb-3 h-1 w-10 rounded-full bg-line-strong sm:hidden" />
             {(title || dismissable) && (
               <div className="mb-3 flex items-center justify-between gap-3">
                 {title ? <h2 className="display text-[22px] text-ink">{title}</h2> : <span />}

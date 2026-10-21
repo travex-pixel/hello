@@ -6,7 +6,9 @@ export interface FunnelReport {
   sessionsWithConnection: number;
   sessionsWithFirstMessage: number;
   sessionsWithResponse: number;
+  /** Conversations that actually opened (AI or a real person). */
   conversationsStarted: number;
+  conversationStartFailures: number;
   conversationsReachedFive: number;
   conversationsEnded: number;
   anotherConversationStarted: number;
@@ -44,7 +46,8 @@ export function computeFunnel(events: AnalyticsEvent[]): FunnelReport {
     sessionsWithConnection: sessionsOf("connection_accepted").size,
     sessionsWithFirstMessage: sessionsOf("first_message_sent").size,
     sessionsWithResponse: sessionsOf("first_response_received").size,
-    conversationsStarted: by("connection_accepted").length,
+    conversationsStarted: by("conversation_started").length,
+    conversationStartFailures: by("conversation_start_failed").length,
     conversationsReachedFive: by("conversation_reached_5").length,
     conversationsEnded: by("conversation_ended").length,
     anotherConversationStarted: by("another_conversation_started").length,

@@ -18,7 +18,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
   return (
     <div>
       <p className="mb-2 text-sm font-medium text-ink">{label}</p>
-      <div role="radiogroup" aria-label={label} className="flex rounded-full bg-surface-2 p-1">
+      <div role="radiogroup" aria-label={label} className={cn("grid gap-1 rounded-[24px] border border-line bg-bg p-1", options.length > 3 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
         {options.map((o) => (
           <button
             key={o.value}
@@ -27,8 +27,8 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
             aria-checked={o.value === value}
             onClick={() => onChange(o.value)}
             className={cn(
-              "h-10 flex-1 rounded-full text-sm font-semibold transition-all",
-              o.value === value ? "bg-surface text-ink shadow-soft" : "text-ink-2 hover:text-ink",
+              "h-10 min-w-0 truncate rounded-full px-2 text-sm font-semibold transition-all",
+              o.value === value ? "bg-accent-soft text-ink ring-1 ring-accent/70" : "text-ink-2 hover:text-ink",
             )}
           >
             {o.label}

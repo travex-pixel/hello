@@ -8,6 +8,8 @@ export type EventName =
   | "landing_viewed"
   | "mode_selected"
   | "discovery_tapped"
+  | "conversation_started"
+  | "conversation_start_failed"
   | "character_presented"
   | "connection_accepted"
   | "connection_declined"
@@ -32,6 +34,7 @@ export type EventProps = Partial<{
   messageCount: number;
   msSinceAccept: number;
   daysSinceLastVisit: number;
+  /** A short category, never free text or message content. */
   reason: string;
 }>;
 

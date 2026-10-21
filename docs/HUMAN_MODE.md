@@ -1,7 +1,7 @@
 # Mates beta: real people on hello
 
 A private, invite-only beta for about 5 to 20 friends. Members sign in with an
-emailed code, tap **Chat with a mate**, and talk to another member who is
+emailed code, tap **Start a conversation**, and talk to another member who is
 looking at the same time and accepts. If nobody is free, hello says so and
 offers the AI demo as a separate, clearly labelled choice.
 
@@ -104,7 +104,7 @@ only take effect after a redeploy.
    select hello.create_bootstrap_invite();
    ```
    It returns a one-use code like `8D89-55F6`.
-3. In hello, open **Your mates and invites** (or tap Chat with a mate), sign in
+3. In hello, open **Your mates and invites** (or tap Start a conversation), sign in
    with your email, and join with that code.
 4. On the Mates screen, **Create an invite code** for each friend (each works
    three times, expires in 14 days, and can be withdrawn).

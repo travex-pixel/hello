@@ -39,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [reduce, setReducedMotion]);
 
   return (
-    <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col">
+    <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col overflow-x-clip">
       {children}
       <Suspense fallback={null}>
         <NavSlot />

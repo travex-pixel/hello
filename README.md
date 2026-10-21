@@ -1,6 +1,6 @@
 # HELLO
 
-**Meet someone interesting. In one tap.**
+**Meet someone interesting.** A good conversation can start with anyone.
 
 HELLO is a social discovery app: pick what you're in the mood for, tap one
 button, and start a conversation. This repository contains a working demo in
@@ -47,12 +47,33 @@ browser and your conversations stay on your device.
 
 ## Design
 
-Warm paper, deep charcoal, one vermilion for the action that matters on a
-screen, cobalt for the person's own messages, mint for "available". Headlines
-and the `hello.` wordmark use Fraunces, a soft optical-size serif; everything
-else is Geist. Tokens live in `src/app/globals.css`; the vermilion speech
-bubble on the Discover screen is the signature interaction and recurs in the
-icons and share image. Every text colour pairing meets WCAG AA contrast.
+Deep midnight navy (`#080d19`) with raised surfaces (`#111827`) and hairline
+borders (`#27334a`). One coral (`#ff6b57`) for the action that matters on a
+screen, electric blue (`#477bff`) for the person's own messages, the AI label
+and focus rings, mint (`#62e6b5`) for "available". Primary text is `#f7f7fb`,
+secondary `#9aa8c4`. Headlines and the `hello.` wordmark use Fraunces, a soft
+optical-size serif; everything else is Geist. Tokens live in
+`src/app/globals.css`; the coral speech bubble on the Discover screen is the
+signature interaction and recurs in the icons and share image. Coral buttons
+carry navy text because white on this coral fails WCAG AA; every text colour
+pairing used in the app is AA or better. Motion is a slow breathing glow, a
+few sparks, a pulsing status dot and the typing indicator, all of which stop
+under `prefers-reduced-motion`.
+
+### Funnel events
+
+Stored locally (`hello.events`) and shown at `/dev/funnel` in development.
+No message contents and no personal information are recorded.
+
+| Event | When |
+|---|---|
+| `landing_viewed` | Discover screen shown |
+| `mode_selected` | A mood was chosen |
+| `discovery_tapped` | Start a conversation tapped (`source: ai` or `human`) |
+| `connection_accepted` | An AI match card was accepted |
+| `conversation_started` | A conversation actually opened (`source: ai` or `human`) |
+| `conversation_start_failed` | It did not open; `reason` is a short category |
+| `first_message_sent` / `first_response_received` | First message each way (`source` on human replies) |
 
 ## Scripts
 

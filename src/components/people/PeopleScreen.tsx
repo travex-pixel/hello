@@ -32,7 +32,7 @@ function HowItWillWork() {
         <strong className="text-ink">Invitation.</strong> A member sends you a code. Joining with it connects the two of you, nothing more.
       </li>
       <li>
-        <strong className="text-ink">Chat with a mate.</strong> Tap it on the home screen when you genuinely have time. You become visible to other members who are looking too, for up to 30 minutes.
+        <strong className="text-ink">Start a conversation.</strong> Tap it on the home screen when you genuinely have time. You become visible to other members who are looking too, for up to 30 minutes.
       </li>
       <li>
         <strong className="text-ink">Both say yes.</strong> One person asks, the other accepts. No one is put into a chat without agreeing.
@@ -231,7 +231,7 @@ function Dashboard({ me, refresh }: { me: MeView; refresh: () => void }) {
   return (
     <>
       <Card title="I'm up for a chat">
-        <ModeSelector value={mode} onChange={setMode} />
+        <ModeSelector value={mode} onChange={setMode} dense />
         {available ? (
           <>
             <p className="text-sm text-ink-2">

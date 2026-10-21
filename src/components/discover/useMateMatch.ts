@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Mode } from "@/lib/characters/types";
 import { describeError, peopleApi, type MatchState } from "@/components/people/api";
+import { track } from "@/lib/analytics/track";
 
 /** How long to look before offering AI as an option. Configurable per deployment. */
 export const MATE_WAIT_MS = (Number(process.env.NEXT_PUBLIC_HELLO_MATE_WAIT_SECONDS) || 45) * 1000;
@@ -33,12 +34,14 @@ export function useMateMatch(mode: Mode) {
       failures.current = 0;
       if (match.state === "connected") {
         active.current = false;
+        track("conversation_started", { mode, source: "human", conversationId: match.conversationId });
         setView({ phase: "connected", conversationId: match.conversationId, withName: match.withName });
         return;
       }
       setView((v) => ({ phase: "looking", match, timedOut: v.phase === "looking" ? v.timedOut : false }));
     } catch (e) {
       failures.current += 1;
+      if (failures.current === 2) track("conversation_start_failed", { mode, source: "human", reason: "unreachable" });
       if (failures.current >= 2) setView((v) => (v.phase === "looking" ? { ...v, error: describeError(e, "Can't reach hello right now. Still trying…") } : v));
     }
   }, [mode]);
@@ -85,16 +88,18 @@ export function useMateMatch(mode: Mode) {
         const res = await peopleApi.answerRequest(requestId, action);
         if (action === "accept" && res.conversationId) {
           active.current = false;
+          track("conversation_started", { mode, source: "human", conversationId: res.conversationId });
           setView({ phase: "connected", conversationId: res.conversationId, withName: "" });
           return;
         }
         void poll();
       } catch (e) {
+        if (action === "accept") track("conversation_start_failed", { mode, source: "human", reason: "request_unavailable" });
         setView((v) => (v.phase === "looking" ? { ...v, error: describeError(e, "That request is no longer available.") } : v));
         void poll();
       }
     },
-    [poll],
+    [poll, mode],
   );
 
   // Leaving the screen while looking withdraws the request and availability.

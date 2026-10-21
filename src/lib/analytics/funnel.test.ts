@@ -11,6 +11,7 @@ describe("computeFunnel", () => {
       ev("discovery_tapped", "a"),
       ev("discovery_tapped", "a"),
       ev("connection_accepted", "a", { mode: "bored" }),
+      ev("conversation_started", "a", { mode: "bored", source: "ai" }),
       ev("first_message_sent", "a", { msSinceAccept: 4000 }),
       ev("first_response_received", "a"),
       ev("conversation_reached_5", "a"),
@@ -18,6 +19,8 @@ describe("computeFunnel", () => {
       ev("landing_viewed", "b"),
       ev("discovery_tapped", "b"),
       ev("connection_accepted", "b", { mode: "warmup" }),
+      ev("conversation_start_failed", "b", { mode: "warmup", source: "ai", reason: "open_failed" }),
+      ev("conversation_started", "b", { mode: "warmup", source: "ai" }),
       ev("first_message_sent", "b", { msSinceAccept: 8000 }),
       ev("landing_viewed", "c"),
     ];
@@ -27,6 +30,8 @@ describe("computeFunnel", () => {
     expect(r.sessionsWithConnection).toBe(2);
     expect(r.sessionsWithFirstMessage).toBe(2);
     expect(r.sessionsWithResponse).toBe(1);
+    expect(r.conversationsStarted).toBe(2);
+    expect(r.conversationStartFailures).toBe(1);
     expect(r.conversationsReachedFive).toBe(1);
     expect(r.feedback.great).toBe(1);
     expect(r.modeSelections).toEqual({ bored: 1, warmup: 1 });

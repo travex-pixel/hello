@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import type { MatchResult } from "@/lib/matching";
 import { TOPIC_LABELS } from "@/lib/characters/topics";
 import { Avatar } from "@/components/ui/Avatar";
@@ -11,11 +11,12 @@ import { Button } from "@/components/ui/Button";
 interface Props {
   match: MatchResult;
   connecting: boolean;
+  error?: string | null;
   onAccept: () => void;
   onDecline: () => void;
 }
 
-export function MatchCard({ match, connecting, onAccept, onDecline }: Props) {
+export function MatchCard({ match, connecting, error, onAccept, onDecline }: Props) {
   const reduce = useReducedMotion();
   const { character, reasons } = match;
   return (
@@ -42,13 +43,13 @@ export function MatchCard({ match, connecting, onAccept, onDecline }: Props) {
 
       <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label="Interests">
         {character.interests.slice(0, 4).map((t) => (
-          <li key={t} className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-ink-2">
+          <li key={t} className="rounded-full border border-line bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-ink-2">
             {TOPIC_LABELS[t]}
           </li>
         ))}
       </ul>
 
-      <div className="mt-3 rounded-md border-l-[3px] border-coral bg-accent-soft/60 px-3 py-2.5">
+      <div className="mt-3 rounded-md border-l-[3px] border-coral bg-accent-soft px-3 py-2.5">
         <p className="text-sm leading-snug text-ink">{character.whyInteresting}</p>
         {reasons.length > 0 && (
           <ul className="mt-1.5 space-y-1">
@@ -64,9 +65,15 @@ export function MatchCard({ match, connecting, onAccept, onDecline }: Props) {
 
       <p className="mt-2.5 text-xs leading-snug text-ink-3">An AI character, not a real person. Replies are generated for this demo and stay on your device.</p>
 
+      {error && (
+        <p role="status" className="mt-2.5 text-sm font-medium text-warning">
+          {error}
+        </p>
+      )}
+
       <div className="mt-3.5 flex flex-col gap-1.5">
-        <Button size="lg" block loading={connecting} onClick={onAccept}>
-          Say hello
+        <Button size="lg" block loading={connecting} onClick={onAccept} icon={<ArrowRight className="size-5" strokeWidth={2.4} aria-hidden="true" />}>
+          {connecting ? "Opening the chat" : "Start the conversation"}
         </Button>
         <Button variant="ghost" block disabled={connecting} onClick={onDecline}>
           Try someone else

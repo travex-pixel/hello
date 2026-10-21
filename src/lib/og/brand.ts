@@ -6,25 +6,25 @@ import { join } from "node:path";
  * time (statically generated), so reading font files synchronously is fine.
  */
 export const BRAND = {
-  paper: "#fbf7f0",
-  surface: "#ffffff",
-  ink: "#1b1917",
-  ink2: "#5a554e",
-  ink3: "#736c62",
-  accent: "#c93a18",
-  coral: "#f2552c",
-  cobalt: "#1e3fd9",
-  cobaltSoft: "#e4e9fb",
-  mintInk: "#176b42",
-  line: "rgba(28,25,20,0.12)",
+  paper: "#080d19",
+  surface: "#111827",
+  ink: "#f7f7fb",
+  ink2: "#9aa8c4",
+  ink3: "#8593b0",
+  accent: "#ff6b57",
+  coral: "#ff6b57",
+  cobalt: "#477bff",
+  cobaltSoft: "rgba(71,123,255,0.16)",
+  mintInk: "#62e6b5",
+  line: "#27334a",
 };
 
-export const ORB_BACKGROUND = "radial-gradient(circle at 32% 22%, #ff8a66 0%, #f2552c 48%, #c93a18 100%)";
+export const ORB_BACKGROUND = "radial-gradient(circle at 32% 22%, #ffa08f 0%, #ff6b57 48%, #e8503c 100%)";
 
-export const SHARE_TITLE = "hello: Meet someone new. In one tap.";
+export const SHARE_TITLE = "hello: Meet someone interesting.";
 export const SHARE_DESCRIPTION =
-  "Bored, a bit shy, or curious? Tap once and start a conversation. Try the AI demo now, no sign-up needed.";
-export const SHARE_ALT = "hello. Meet someone new. In one tap. Choose I'm bored, Warm me up or Surprise me.";
+  "A good conversation can start with anyone. Pick a mood, tap once, and start talking. Try the AI demo now, no sign-up needed.";
+export const SHARE_ALT = "hello. Meet someone interesting. A good conversation can start with anyone. Choose I'm bored, Warm me up or Surprise me.";
 
 export function loadBrandFonts() {
   const dir = join(process.cwd(), "assets/fonts");

@@ -14,6 +14,8 @@ import { mulberry32 } from "@/lib/utils/rng";
 export const DISCOVERY_REVEAL_MS = 1100;
 const DISCOVERY_REVEAL_REDUCED_MS = 250;
 
+export const START_FAILED_MESSAGE = "Couldn't start that conversation. Nothing was sent. Please try again.";
+
 export type DiscoveryState =
   | { status: "idle" }
   | { status: "searching" }
@@ -24,8 +26,10 @@ export type DiscoveryState =
 export function useDiscovery() {
   const router = useRouter();
   const [state, setState] = useState<DiscoveryState>({ status: "idle" });
+  const [error, setError] = useState<string | null>(null);
   const declinedRef = useRef<string[]>([]);
   const runRef = useRef(0);
+  const busyRef = useRef(false);
 
   const mode = useHello((s) => s.mode);
   const preferences = useHello((s) => s.preferences);
@@ -37,25 +41,38 @@ export function useDiscovery() {
   const setAutoStart = useHello((s) => s.setAutoStart);
 
   const start = useCallback(async () => {
+    // A second tap before the first has rendered must not start a second search.
+    if (busyRef.current) return;
+    busyRef.current = true;
     const run = ++runRef.current;
-    track("discovery_tapped", { mode });
+    setError(null);
+    track("discovery_tapped", { mode, source: "ai" });
     setState({ status: "searching" });
-    const match = findMatch({
-      mode,
-      preferences,
-      recentCharacterIds: [...declinedRef.current, ...recent],
-      blockedCharacterIds: blocked,
-      rng: mulberry32((Date.now() ^ (run * 2654435761)) >>> 0),
-    });
-    await new Promise((r) => setTimeout(r, reduced ? DISCOVERY_REVEAL_REDUCED_MS : DISCOVERY_REVEAL_MS));
-    if (run !== runRef.current) return;
-    if (!match) {
-      track("no_candidates", { mode });
-      setState({ status: "empty" });
-      return;
+    try {
+      const match = findMatch({
+        mode,
+        preferences,
+        recentCharacterIds: [...declinedRef.current, ...recent],
+        blockedCharacterIds: blocked,
+        rng: mulberry32((Date.now() ^ (run * 2654435761)) >>> 0),
+      });
+      await new Promise((r) => setTimeout(r, reduced ? DISCOVERY_REVEAL_REDUCED_MS : DISCOVERY_REVEAL_MS));
+      if (run !== runRef.current) return;
+      if (!match) {
+        track("no_candidates", { mode });
+        setState({ status: "empty" });
+        return;
+      }
+      track("character_presented", { mode, characterId: match.character.id });
+      setState({ status: "found", match });
+    } catch {
+      if (run !== runRef.current) return;
+      track("conversation_start_failed", { mode, source: "ai", reason: "match_failed" });
+      setError(START_FAILED_MESSAGE);
+      setState({ status: "idle" });
+    } finally {
+      if (run === runRef.current) busyRef.current = false;
     }
-    track("character_presented", { mode, characterId: match.character.id });
-    setState({ status: "found", match });
   }, [mode, preferences, recent, blocked, reduced]);
 
   const tryAnother = useCallback(() => {
@@ -68,23 +85,29 @@ export function useDiscovery() {
   const accept = useCallback(async () => {
     if (state.status !== "found") return;
     const { match } = state;
+    setError(null);
     setState({ status: "connecting", match });
     track("connection_accepted", { mode, characterId: match.character.id });
     try {
       const id = await startConversation(match.character.id, mode);
+      track("conversation_started", { mode, characterId: match.character.id, conversationId: id, source: "ai" });
       router.push(`/chat/${id}`);
       // Next keeps this screen mounted but hidden during navigation; reset it
       // now so coming back lands on the idle hero, not a stale card.
       declinedRef.current = [];
       setState({ status: "idle" });
     } catch {
+      track("conversation_start_failed", { mode, characterId: match.character.id, source: "ai", reason: "open_failed" });
+      setError(START_FAILED_MESSAGE);
       setState({ status: "found", match });
     }
   }, [state, mode, startConversation, router]);
 
   const reset = useCallback(() => {
     runRef.current += 1;
+    busyRef.current = false;
     declinedRef.current = [];
+    setError(null);
     setState({ status: "idle" });
   }, []);
 
@@ -103,5 +126,5 @@ export function useDiscovery() {
     window.setTimeout(() => void startRef.current(), 0);
   }, [autoStart, setAutoStart, mode]);
 
-  return { state, start, tryAnother, accept, reset };
+  return { state, error, start, tryAnother, accept, reset };
 }

@@ -33,6 +33,7 @@ export function FunnelView() {
     ["Sent first message", `${report.sessionsWithFirstMessage} (${pct(report.sessionsWithFirstMessage, report.sessionsWithConnection)})`],
     ["Received a reply", `${report.sessionsWithResponse} (${pct(report.sessionsWithResponse, report.sessionsWithFirstMessage)})`],
     ["Conversations started", String(report.conversationsStarted)],
+    ["Conversation starts failed", String(report.conversationStartFailures)],
     ["Reached 5 messages", `${report.conversationsReachedFive} (${pct(report.conversationsReachedFive, report.conversationsStarted)})`],
     ["Started another", String(report.anotherConversationStarted)],
     ["Median ms to first message", report.medianMsToFirstMessage === null ? "–" : String(Math.round(report.medianMsToFirstMessage))],

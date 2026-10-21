@@ -23,7 +23,7 @@ export default function OpenGraphImage() {
           overflow: "hidden",
         }}
       >
-        {/* Warm light behind the button, kept inside the frame. */}
+        {/* Warm light behind the button and a cool one low on the left, kept inside the frame. */}
         <div
           style={{
             position: "absolute",
@@ -31,7 +31,8 @@ export default function OpenGraphImage() {
             top: 0,
             width: 1200,
             height: 630,
-            background: "radial-gradient(ellipse 700px 540px at 930px 315px, rgba(242,85,44,0.22) 0%, rgba(242,85,44,0.07) 45%, rgba(251,247,240,0) 75%)",
+            background:
+              "radial-gradient(ellipse 720px 560px at 930px 315px, rgba(255,107,87,0.28) 0%, rgba(255,107,87,0.08) 45%, rgba(8,13,25,0) 75%), radial-gradient(ellipse 500px 360px at 120px 640px, rgba(71,123,255,0.22) 0%, rgba(8,13,25,0) 70%)",
           }}
         />
 
@@ -41,10 +42,14 @@ export default function OpenGraphImage() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", flexDirection: "column", fontFamily: "Fraunces", fontSize: 88, lineHeight: 0.98, letterSpacing: -3 }}>
-              <span>Meet someone new.</span>
-              <span style={{ color: BRAND.accent }}>In one tap.</span>
+            <div style={{ display: "flex", flexDirection: "column", fontFamily: "Fraunces", fontSize: 84, lineHeight: 1, letterSpacing: -3 }}>
+              <span>Meet someone</span>
+              <div style={{ display: "flex" }}>
+                <span>interesting</span>
+                <span style={{ color: BRAND.accent }}>.</span>
+              </div>
             </div>
+            <div style={{ display: "flex", marginTop: 18, fontSize: 30, color: BRAND.ink2 }}>A good conversation can start with anyone.</div>
             <div style={{ display: "flex", marginTop: 36, gap: 12 }}>
               {MODES.map((m, i) => (
                 <div
@@ -55,8 +60,8 @@ export default function OpenGraphImage() {
                     borderRadius: 999,
                     fontSize: 25,
                     fontWeight: 600,
-                    background: i === 0 ? BRAND.surface : "rgba(255,255,255,0.5)",
-                    border: `1.5px solid ${i === 0 ? "rgba(28,25,20,0.2)" : BRAND.line}`,
+                    background: i === 0 ? "rgba(255,107,87,0.14)" : BRAND.surface,
+                    border: `1.5px solid ${i === 0 ? BRAND.accent : BRAND.line}`,
                     color: i === 0 ? BRAND.ink : BRAND.ink2,
                   }}
                 >
@@ -74,10 +79,10 @@ export default function OpenGraphImage() {
 
         <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "center", position: "relative" }}>
           {[540, 450].map((d, i) => (
-            <div key={d} style={{ position: "absolute", width: d, height: d, borderRadius: 9999, border: `2px solid rgba(242,85,44,${i === 0 ? 0.14 : 0.26})` }} />
+            <div key={d} style={{ position: "absolute", width: d, height: d, borderRadius: 9999, border: `2px solid rgba(255,107,87,${i === 0 ? 0.14 : 0.26})` }} />
           ))}
           {/* Speech-bubble tail */}
-          <div style={{ position: "absolute", left: 104, top: 428, width: 60, height: 60, borderRadius: 10, background: "#cf3d1b", transform: "rotate(45deg)" }} />
+          <div style={{ position: "absolute", left: 104, top: 428, width: 60, height: 60, borderRadius: 10, background: "#e8503c", transform: "rotate(45deg)" }} />
           <div
             style={{
               display: "flex",
@@ -92,19 +97,23 @@ export default function OpenGraphImage() {
             <div
               style={{
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 width: 338,
                 height: 338,
                 borderRadius: 9999,
                 border: "1.5px solid rgba(255,255,255,0.3)",
-                fontSize: 30,
+                fontSize: 26,
                 fontWeight: 600,
-                letterSpacing: 7,
-                color: "#ffffff",
+                letterSpacing: 5,
+                lineHeight: 1.3,
+                color: "#080d19",
               }}
             >
-              SAY HELLO
+              <span>START A</span>
+              <span>CONVERSATION</span>
+              <span style={{ marginTop: 10, fontSize: 34, letterSpacing: 0 }}>→</span>
             </div>
           </div>
         </div>

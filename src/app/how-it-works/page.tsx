@@ -48,7 +48,7 @@ export default function HowItWorksPage() {
 
       <Section title="Real people">
         <p>
-          Chatting with real people is a private, invite-only beta. Members sign in with an emailed code and tap <strong className="text-ink">Chat with a mate</strong>{" "}
+          Chatting with real people is a private, invite-only beta. Members sign in with an emailed code and tap <strong className="text-ink">Start a conversation</strong>{" "}
           when they genuinely have time. A conversation only starts when the other person accepts, and anyone can leave, block or report at any time.
         </p>
         <p>

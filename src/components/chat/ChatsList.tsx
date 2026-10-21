@@ -52,7 +52,7 @@ export function ChatsList() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-[15px] font-semibold text-ink">{c.withName}</span>
-                      <span className="rounded-full bg-mint px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-mint-ink">Real person</span>
+                      <span className="rounded-full border border-mint-ink/40 bg-mint px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-mint-ink">Real person</span>
                       <span className="ml-auto shrink-0 text-xs text-ink-3">{formatRelative(c.startedAt)}</span>
                     </div>
                     <p className="mt-0.5 text-xs text-ink-3">
@@ -74,9 +74,9 @@ export function ChatsList() {
         <div className="mt-10 flex flex-1 flex-col items-center justify-start text-center">
           <div className="w-full rounded-xl bg-surface p-6 shadow-card">
             <h2 className="display text-[26px] text-ink">No conversations yet</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-2">Tap the button on Discover and someone will be here within seconds.</p>
+            <p className="mt-2 text-sm leading-relaxed text-ink-2">Pick a mood on Discover and start a conversation. It takes one tap.</p>
             <Button className="mt-4" block onClick={() => router.push("/")}>
-              Find someone to talk to
+              Start a conversation
             </Button>
           </div>
         </div>

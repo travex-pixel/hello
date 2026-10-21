@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   title: { default: SHARE_TITLE, template: "%s · hello" },
   description: SHARE_DESCRIPTION,
   applicationName: "hello",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "hello" },
+  appleWebApp: { capable: true, statusBarStyle: "black", title: "hello" },
   openGraph: {
     type: "website",
     siteName: "hello",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fbf7f0",
+  themeColor: "#080d19",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ArrowLeft, MoreHorizontal, UserRound } from "lucide-react";
 import { MODE_COPY } from "@/lib/matching";
+import { track } from "@/lib/analytics/track";
 import type { Mode } from "@/lib/characters/types";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
@@ -45,6 +46,8 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastSeq = useRef(0);
   const lastActivity = useRef(0);
+  const loaded = useRef(false);
+  const hadReply = useRef(false);
 
   /** Fetches only messages after the last one we have; the server's sequence is the order of record. */
   const load = useCallback(async () => {
@@ -56,6 +59,11 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
       if (fresh.length) {
         lastActivity.current = Date.now();
         lastSeq.current = Math.max(lastSeq.current, ...fresh.map((m) => m.seq));
+        // The first reply from the other person while this screen is open. No content is recorded.
+        if (fresh.some((m) => !m.mine)) {
+          if (loaded.current && !hadReply.current) track("first_response_received", { mode: v.mode, conversationId, source: "human" });
+          hadReply.current = true;
+        }
         setMessages((prev) => {
           const known = new Set(prev.map((m) => m.id));
           return [...prev, ...fresh.filter((m) => !known.has(m.id))].sort((a, b) => a.seq - b.seq);
@@ -64,6 +72,7 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
         const confirmed = new Set(fresh.map((m) => m.clientId).filter(Boolean));
         setOutbox((o) => o.filter((x) => !confirmed.has(x.clientId)));
       }
+      loaded.current = true;
     } catch (e) {
       if (e instanceof PeopleApiError && (e.status === 404 || e.status === 401 || e.status === 403)) {
         setFatal(e.status === 404 ? "This conversation isn't available." : "Please sign in again to see this conversation.");
@@ -129,7 +138,7 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex w-full max-w-md flex-col bg-bg">
-      <header className="flex items-center gap-2 border-b border-line bg-bg/92 px-2 pb-2 pt-[calc(var(--safe-top)+8px)] backdrop-blur-md">
+      <header className="flex items-center gap-2 border-b border-line bg-bg/90 px-2 pb-2 pt-[calc(var(--safe-top)+8px)] backdrop-blur-md">
         <IconButton label="Back" onClick={() => router.push("/people")}>
           <ArrowLeft className="size-5" />
         </IconButton>
@@ -139,7 +148,7 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h1 className="truncate text-[15px] font-semibold text-ink">{view.other.displayName}</h1>
-            <span className="rounded-full bg-mint px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-mint-ink">Real person</span>
+            <span className="rounded-full border border-mint-ink/40 bg-mint px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-mint-ink">Real person</span>
           </div>
           <p className="truncate text-xs text-ink-3">
             {MODE_COPY[view.mode].label} · Mates beta{ended ? " · Ended" : ""}
@@ -178,7 +187,7 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
       {ended ? (
         <div className="flex flex-col gap-2 border-t border-line px-3 pb-[calc(12px+var(--safe-bottom))] pt-3">
           <Button size="lg" block onClick={() => router.push("/people")}>
-            Back to Real people
+            Back to Mates
           </Button>
         </div>
       ) : (

@@ -17,12 +17,13 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   children?: ReactNode;
 }
 
+/* Coral carries navy text: white on coral fails AA, navy on coral is 6.9:1. */
 const VARIANT: Record<Variant, string> = {
-  primary: "bg-accent text-white shadow-button hover:bg-accent-strong active:bg-accent-deep disabled:bg-surface-3 disabled:text-ink-3 disabled:shadow-none",
-  cobalt: "bg-cobalt text-white hover:bg-cobalt-deep active:bg-cobalt-deep disabled:bg-surface-3 disabled:text-ink-3",
-  secondary: "bg-surface text-ink border border-line-strong shadow-soft hover:bg-surface-2 active:bg-surface-3 disabled:text-ink-3 disabled:shadow-none",
+  primary: "bg-accent text-ink-inverse shadow-button hover:bg-accent-strong active:bg-accent-deep disabled:bg-surface-3 disabled:text-ink-3 disabled:shadow-none",
+  cobalt: "bg-cobalt-deep text-white hover:bg-cobalt active:bg-cobalt-deep disabled:bg-surface-3 disabled:text-ink-3",
+  secondary: "bg-surface-2 text-ink border border-line-strong hover:bg-surface-3 hover:border-ink-3 active:bg-surface-3 disabled:text-ink-3 disabled:border-line",
   ghost: "bg-transparent text-ink-2 hover:bg-surface-2 hover:text-ink active:bg-surface-3 disabled:text-ink-3",
-  danger: "bg-transparent text-danger border border-line-strong hover:bg-danger/8 active:bg-danger/12 disabled:text-ink-3",
+  danger: "bg-transparent text-danger border border-line-strong hover:bg-danger/10 active:bg-danger/15 disabled:text-ink-3",
 };
 
 const SIZE: Record<Size, string> = {

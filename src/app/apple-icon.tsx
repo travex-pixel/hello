@@ -9,8 +9,8 @@ export default function AppleIcon() {
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: BRAND.paper, position: "relative", fontFamily: "Fraunces" }}>
-        <div style={{ position: "absolute", left: 38, top: 116, width: 32, height: 32, borderRadius: 6, background: "#d8401c", transform: "rotate(45deg)" }} />
-        <div style={{ width: 124, height: 124, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", background: ORB_BACKGROUND, color: "#fff", fontSize: 52, letterSpacing: -1 }}>
+        <div style={{ position: "absolute", left: 38, top: 116, width: 32, height: 32, borderRadius: 6, background: "#e8503c", transform: "rotate(45deg)" }} />
+        <div style={{ width: 124, height: 124, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", background: ORB_BACKGROUND, color: "#080d19", fontSize: 52, letterSpacing: -1 }}>
           hello
         </div>
       </div>
