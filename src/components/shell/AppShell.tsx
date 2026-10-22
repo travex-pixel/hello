@@ -19,7 +19,7 @@ function NavSlot() {
   if (FULLSCREEN.some((rx) => rx.test(pathname))) return null;
   return (
     <>
-      <div aria-hidden="true" className="h-[calc(var(--nav-height)+var(--safe-bottom))] shrink-0" />
+      <div aria-hidden="true" className="h-[calc(var(--nav-height)+var(--safe-bottom)+14px)] shrink-0" />
       <BottomNav />
     </>
   );

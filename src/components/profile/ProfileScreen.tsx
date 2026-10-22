@@ -18,7 +18,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
   return (
     <div>
       <p className="mb-2 text-sm font-medium text-ink">{label}</p>
-      <div role="radiogroup" aria-label={label} className={cn("grid gap-1 rounded-[24px] border border-line bg-bg p-1", options.length > 3 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
+      <div role="radiogroup" aria-label={label} className={cn("grid gap-1 rounded-[22px] bg-black/30 p-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.06)]", options.length > 3 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
         {options.map((o) => (
           <button
             key={o.value}
@@ -28,7 +28,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
             onClick={() => onChange(o.value)}
             className={cn(
               "h-10 min-w-0 truncate rounded-full px-2 text-sm font-semibold transition-all",
-              o.value === value ? "bg-accent-soft text-ink ring-1 ring-accent/70" : "text-ink-2 hover:text-ink",
+              o.value === value ? "bg-[linear-gradient(180deg,#2c3040,#22263a)] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_4px_12px_rgba(0,0,0,0.45)]" : "text-ink-3 hover:text-ink-2",
             )}
           >
             {o.label}
@@ -41,7 +41,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
 
 function Card({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-xl bg-surface p-4 shadow-card", className)}>
+    <section className={cn("rounded-[26px] bg-[linear-gradient(180deg,#171a24,#12141c)] p-5 shadow-card", className)}>
       <h2 className="display text-[22px] text-ink">{title}</h2>
       <div className="mt-3 flex flex-col gap-4">{children}</div>
     </section>
@@ -85,7 +85,7 @@ export function ProfileScreen() {
                 value={preferences.displayName ?? ""}
                 onChange={(e) => setPreferences({ displayName: e.target.value.trim() ? e.target.value : undefined })}
                 placeholder="First name or nickname"
-                className="h-12 w-full rounded-md border border-line-strong bg-bg px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-cobalt"
+                className="h-[52px] w-full rounded-2xl border border-line bg-black/30 px-4 text-[16px] text-ink shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)] placeholder:text-ink-3"
               />
             </div>
             <div>
@@ -97,7 +97,7 @@ export function ProfileScreen() {
                   </Chip>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-ink-3">Used to explain matches, like &ldquo;you both like music&rdquo;. Surprise me deliberately looks elsewhere.</p>
+              
             </div>
             <Segmented<DepthPreference>
               label="Quick hello or a deeper conversation?"
@@ -123,11 +123,8 @@ export function ProfileScreen() {
           </Card>
 
           <Card title="Mates">
-            <p className="text-sm leading-relaxed text-ink-2">
-              Chatting with real people is an invite-only beta. Sign in, manage invites, privacy and your account there. Nobody is ever swapped for an AI without
-              telling you.
-            </p>
-            <Link href="/people" className="flex items-center justify-between rounded-md bg-surface-2 px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface-3">
+            <p className="text-sm text-ink-3">Real people, invite-only.</p>
+            <Link href="/people" className="flex min-h-[52px] items-center justify-between rounded-2xl bg-white/[0.05] px-4 text-[15px] font-semibold text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] transition-colors hover:bg-white/[0.08]">
               Open Mates
               <ChevronRight className="size-4 text-ink-3" aria-hidden="true" />
             </Link>
@@ -155,7 +152,7 @@ export function ProfileScreen() {
             <Button variant="danger" block onClick={() => setConfirmClear(true)}>
               Clear demo history
             </Button>
-            <Link href="/how-it-works" className="flex items-center justify-between rounded-md bg-surface-2 px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface-3">
+            <Link href="/how-it-works" className="flex min-h-[52px] items-center justify-between rounded-2xl bg-white/[0.05] px-4 text-[15px] font-semibold text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] transition-colors hover:bg-white/[0.08]">
               How HELLO works
               <ChevronRight className="size-4 text-ink-3" aria-hidden="true" />
             </Link>

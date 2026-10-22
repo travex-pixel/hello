@@ -138,7 +138,7 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex w-full max-w-md flex-col bg-bg">
-      <header className="flex items-center gap-2 border-b border-line bg-bg/90 px-2 pb-2 pt-[calc(var(--safe-top)+8px)] backdrop-blur-md">
+      <header className="glass flex items-center gap-2 border-b border-line px-2 pb-2 pt-[calc(var(--safe-top)+8px)]">
         <IconButton label="Back" onClick={() => router.push("/people")}>
           <ArrowLeft className="size-5" />
         </IconButton>
@@ -196,7 +196,7 @@ export function HumanChatScreen({ conversationId }: { conversationId: string }) 
             {startersOpen && (
               <Starters
                 starters={STARTERS[view.mode]}
-                hint="Not sure how to start? Tap one, or type anything."
+                hint="Tap one, or type anything."
                 onPick={(s) => {
                   composerRef.current?.setText(s);
                   setStartersOverride(false);

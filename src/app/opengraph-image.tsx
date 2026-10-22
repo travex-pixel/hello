@@ -32,7 +32,7 @@ export default function OpenGraphImage() {
             width: 1200,
             height: 630,
             background:
-              "radial-gradient(ellipse 720px 560px at 930px 315px, rgba(255,107,87,0.28) 0%, rgba(255,107,87,0.08) 45%, rgba(8,13,25,0) 75%), radial-gradient(ellipse 500px 360px at 120px 640px, rgba(71,123,255,0.22) 0%, rgba(8,13,25,0) 70%)",
+              "radial-gradient(ellipse 720px 560px at 930px 315px, rgba(106,98,239,0.42) 0%, rgba(106,98,239,0.1) 45%, rgba(7,8,13,0) 75%), radial-gradient(ellipse 500px 360px at 120px 640px, rgba(167,139,250,0.16) 0%, rgba(7,8,13,0) 70%)",
           }}
         />
 
@@ -60,8 +60,8 @@ export default function OpenGraphImage() {
                     borderRadius: 999,
                     fontSize: 25,
                     fontWeight: 600,
-                    background: i === 0 ? "rgba(255,107,87,0.14)" : BRAND.surface,
-                    border: `1.5px solid ${i === 0 ? BRAND.accent : BRAND.line}`,
+                    background: i === 0 ? "#2a2e3e" : BRAND.surface,
+                    border: `1.5px solid ${i === 0 ? "rgba(255,255,255,0.18)" : BRAND.line}`,
                     color: i === 0 ? BRAND.ink : BRAND.ink2,
                   }}
                 >
@@ -79,10 +79,8 @@ export default function OpenGraphImage() {
 
         <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "center", position: "relative" }}>
           {[540, 450].map((d, i) => (
-            <div key={d} style={{ position: "absolute", width: d, height: d, borderRadius: 9999, border: `2px solid rgba(255,107,87,${i === 0 ? 0.14 : 0.26})` }} />
+            <div key={d} style={{ position: "absolute", width: d, height: d, borderRadius: 9999, border: `1.5px solid rgba(255,255,255,${i === 0 ? 0.06 : 0.1})` }} />
           ))}
-          {/* Speech-bubble tail */}
-          <div style={{ position: "absolute", left: 104, top: 428, width: 60, height: 60, borderRadius: 10, background: "#e8503c", transform: "rotate(45deg)" }} />
           <div
             style={{
               display: "flex",
@@ -104,16 +102,15 @@ export default function OpenGraphImage() {
                 height: 338,
                 borderRadius: 9999,
                 border: "1.5px solid rgba(255,255,255,0.3)",
-                fontSize: 26,
+                fontSize: 32,
                 fontWeight: 600,
-                letterSpacing: 5,
-                lineHeight: 1.3,
-                color: "#080d19",
+                lineHeight: 1.2,
+                color: "#ffffff",
               }}
             >
-              <span>START A</span>
-              <span>CONVERSATION</span>
-              <span style={{ marginTop: 10, fontSize: 34, letterSpacing: 0 }}>→</span>
+              <span>Start a</span>
+              <span>conversation</span>
+              <span style={{ marginTop: 16, fontSize: 30, width: 56, height: 56, borderRadius: 999, background: "rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>→</span>
             </div>
           </div>
         </div>

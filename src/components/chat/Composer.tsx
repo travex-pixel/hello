@@ -60,7 +60,7 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer({ on
 
   return (
     <form
-      className="flex items-end gap-2 border-t border-line bg-bg/90 px-3 pb-[calc(10px+var(--safe-bottom))] pt-2.5 backdrop-blur-md"
+      className="glass flex items-end gap-2 border-t border-line px-3 pb-[calc(10px+var(--safe-bottom))] pt-2.5"
       onSubmit={(e) => {
         e.preventDefault();
         submit();
@@ -86,13 +86,13 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer({ on
         enterKeyHint="send"
         autoComplete="off"
         maxLength={1000}
-        className="max-h-[140px] min-h-[46px] flex-1 resize-none rounded-[22px] border border-line-strong bg-surface px-4 py-3 text-[15px] leading-5 text-ink placeholder:text-ink-3 focus:border-cobalt disabled:opacity-60"
+        className="max-h-[140px] min-h-[46px] flex-1 resize-none rounded-[23px] border border-line bg-black/30 px-4 py-3 text-[16px] leading-5 text-ink shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)] placeholder:text-ink-3 disabled:opacity-60"
       />
       <button
         type="submit"
         aria-label="Send"
         disabled={!canSend}
-        className="mb-0.5 inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-ink-inverse shadow-button transition-all duration-150 hover:bg-accent-strong active:scale-95 disabled:bg-surface-3 disabled:text-ink-3 disabled:shadow-none"
+        className="mb-0.5 inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(180deg,#ffffff,#e6e8ef)] text-ink-inverse shadow-button transition-all duration-150 hover:brightness-105 active:scale-95 disabled:bg-none disabled:bg-surface-3 disabled:text-ink-3 disabled:shadow-none"
       >
         <ArrowUp className="size-5" strokeWidth={2.4} />
       </button>

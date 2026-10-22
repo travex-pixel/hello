@@ -16,7 +16,7 @@ import { SignIn } from "./SignIn";
 
 function Card({ title, children, tone = "default" }: { title?: string; children: React.ReactNode; tone?: "default" | "warning" }) {
   return (
-    <section className={tone === "warning" ? "rounded-xl border border-warning/40 bg-warning/10 p-4" : "rounded-xl bg-surface p-4 shadow-card"}>
+    <section className={tone === "warning" ? "rounded-xl border border-warning/40 bg-warning/10 p-4" : "rounded-[26px] bg-[linear-gradient(180deg,#171a24,#12141c)] p-5 shadow-card"}>
       {title && <h2 className="display text-[22px] text-ink">{title}</h2>}
       <div className={title ? "mt-3 flex flex-col gap-3" : "flex flex-col gap-3"}>{children}</div>
     </section>
@@ -112,7 +112,7 @@ function JoinForm({ onJoined }: { onJoined: () => void }) {
             onChange={(e) => setInviteCode(e.target.value)}
             placeholder="ABCD-EFGH"
             autoCapitalize="characters"
-            className="mt-1.5 h-12 w-full rounded-md border border-line-strong bg-bg px-4 font-mono text-[15px] uppercase text-ink placeholder:text-ink-3 focus:border-cobalt"
+            className="mt-1.5 h-[52px] w-full rounded-2xl border border-line bg-black/30 px-4 font-mono text-[15px] uppercase text-ink placeholder:text-ink-3 focus:border-cobalt"
           />
         </label>
         <label className="block text-sm font-medium text-ink">
@@ -122,7 +122,7 @@ function JoinForm({ onJoined }: { onJoined: () => void }) {
             onChange={(e) => setDisplayName(e.target.value)}
             maxLength={30}
             placeholder="First name or nickname"
-            className="mt-1.5 h-12 w-full rounded-md border border-line-strong bg-bg px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-cobalt"
+            className="mt-1.5 h-[52px] w-full rounded-2xl border border-line bg-black/30 px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-cobalt"
           />
         </label>
         <label className="flex items-start gap-3 text-sm text-ink">

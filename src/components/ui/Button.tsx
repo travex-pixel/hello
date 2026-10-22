@@ -17,19 +17,19 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   children?: ReactNode;
 }
 
-/* Coral carries navy text: white on coral fails AA, navy on coral is 6.9:1. */
+/* Primary is pearl: the brightest object on a dark screen, so there is never doubt about what to tap. */
 const VARIANT: Record<Variant, string> = {
-  primary: "bg-accent text-ink-inverse shadow-button hover:bg-accent-strong active:bg-accent-deep disabled:bg-surface-3 disabled:text-ink-3 disabled:shadow-none",
+  primary: "bg-[linear-gradient(180deg,#ffffff,#e6e8ef)] text-ink-inverse shadow-button hover:brightness-105 active:brightness-95 disabled:bg-none disabled:bg-surface-3 disabled:text-ink-3 disabled:shadow-none",
   cobalt: "bg-cobalt-deep text-white hover:bg-cobalt active:bg-cobalt-deep disabled:bg-surface-3 disabled:text-ink-3",
-  secondary: "bg-surface-2 text-ink border border-line-strong hover:bg-surface-3 hover:border-ink-3 active:bg-surface-3 disabled:text-ink-3 disabled:border-line",
-  ghost: "bg-transparent text-ink-2 hover:bg-surface-2 hover:text-ink active:bg-surface-3 disabled:text-ink-3",
-  danger: "bg-transparent text-danger border border-line-strong hover:bg-danger/10 active:bg-danger/15 disabled:text-ink-3",
+  secondary: "bg-white/[0.06] text-ink shadow-soft hover:bg-white/[0.1] active:bg-white/[0.04] disabled:text-ink-3 disabled:shadow-none",
+  ghost: "bg-transparent text-ink-2 hover:bg-white/[0.06] hover:text-ink active:bg-white/[0.04] disabled:text-ink-3",
+  danger: "bg-white/[0.04] text-danger shadow-soft hover:bg-danger/10 active:bg-danger/15 disabled:text-ink-3",
 };
 
 const SIZE: Record<Size, string> = {
   sm: "h-10 px-4 text-sm gap-2",
   md: "h-12 px-5 text-[15px] gap-2",
-  lg: "h-14 px-6 text-base gap-2.5",
+  lg: "h-[56px] px-6 text-[17px] gap-2.5",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

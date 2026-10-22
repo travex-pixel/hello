@@ -24,10 +24,10 @@ export function MatePanel({ view, onStop, onKeepLooking, onChooseAI, onRespond }
 
   if (m?.state === "incoming") {
     return (
-      <motion.div {...fade} className="w-full rounded-xl bg-surface p-5 text-left shadow-card" role="alertdialog" aria-label={`${m.fromName} wants to say hello`}>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-accent">A mate wants to chat</p>
+      <motion.div {...fade} className="w-full rounded-[26px] bg-[linear-gradient(180deg,#171a24,#12141c)] p-5 text-left shadow-card" role="alertdialog" aria-label={`${m.fromName} wants to say hello`}>
+        <p className="text-[13px] font-semibold text-mint-ink">A real person</p>
         <h2 className="display mt-2 text-[30px] leading-tight text-ink">{m.fromName} wants to say hello</h2>
-        <p className="mt-1 text-sm text-ink-2">A real person from the beta. Nothing starts unless you accept.</p>
+        <p className="mt-1 text-sm text-ink-3">Nothing starts unless you accept.</p>
         <div className="mt-4 flex flex-col gap-1.5">
           <Button size="lg" block onClick={() => onRespond(m.requestId, "accept")}>
             Say hello back
@@ -42,12 +42,9 @@ export function MatePanel({ view, onStop, onKeepLooking, onChooseAI, onRespond }
 
   if (view.timedOut && (!m || m.state === "waiting")) {
     return (
-      <motion.div {...fade} className="w-full rounded-xl bg-surface p-5 text-left shadow-card">
+      <motion.div {...fade} className="w-full rounded-[26px] bg-[linear-gradient(180deg,#171a24,#12141c)] p-5 text-left shadow-card">
         <h2 className="display text-[28px] leading-tight text-ink">No mates free right now</h2>
-        <p className="mt-2 text-sm leading-relaxed text-ink-2">
-          You&rsquo;re still visible to the beta for a while, so someone may still pick up. Or chat with an AI character in the meantime: it&rsquo;s clearly labelled, and
-          choosing it stops your search.
-        </p>
+        <p className="mt-2 text-sm leading-relaxed text-ink-3">You&rsquo;re still visible for a while. Or try an AI character, clearly labelled.</p>
         <div className="mt-4 flex flex-col gap-1.5">
           <Button size="lg" block onClick={onChooseAI}>
             Chat with AI instead
@@ -74,7 +71,7 @@ export function MatePanel({ view, onStop, onKeepLooking, onChooseAI, onRespond }
 
   return (
     <motion.div {...fade} className="flex w-full flex-col items-center" aria-live="polite">
-      <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-accent">{headline}</p>
+      <p className="text-[15px] font-medium text-accent">{headline}</p>
       <p className="mt-1.5 max-w-[320px] text-sm text-ink-2">{detail}</p>
       {view.error && (
         <p role="status" className="mt-2 text-sm text-warning">

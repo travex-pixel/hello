@@ -47,18 +47,17 @@ browser and your conversations stay on your device.
 
 ## Design
 
-Deep midnight navy (`#080d19`) with raised surfaces (`#111827`) and hairline
-borders (`#27334a`). One coral (`#ff6b57`) for the action that matters on a
-screen, electric blue (`#477bff`) for the person's own messages, the AI label
-and focus rings, mint (`#62e6b5`) for "available". Primary text is `#f7f7fb`,
-secondary `#9aa8c4`. Headlines and the `hello.` wordmark use Fraunces, a soft
-optical-size serif; everything else is Geist. Tokens live in
-`src/app/globals.css`; the coral speech bubble on the Discover screen is the
-signature interaction and recurs in the icons and share image. Coral buttons
-carry navy text because white on this coral fails WCAG AA; every text colour
-pairing used in the app is AA or better. Motion is a slow breathing glow, a
-few sparks, a pulsing status dot and the typing indicator, all of which stop
-under `prefers-reduced-motion`.
+Near-black ink (`#07080d`) with frosted-glass bars and sheets, and depth built
+from a top highlight, a hairline contour and a long soft shadow. One soft iris
+glow (`#5b52e4` to `#aeabff`) marks the single thing to tap on Discover;
+everywhere else the primary button is pearl white, the brightest object on the
+screen. Mint (`#6fe3b6`) only means "available". Headlines and the `hello.`
+wordmark use Fraunces; everything else is Geist. The layout follows Apple's
+principles: one clear action per screen, short labels, large touch targets, a
+segmented control for the mood and a floating tab bar. Tokens live in
+`src/app/globals.css`. Every text colour pairing in use is WCAG AA or better,
+and all motion (a slow sheen, contour ripples, typing dots) stops under
+`prefers-reduced-motion`.
 
 ### Funnel events
 

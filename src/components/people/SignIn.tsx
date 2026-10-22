@@ -42,10 +42,10 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   };
 
   const input =
-    "mt-1.5 h-12 w-full rounded-md border border-line-strong bg-bg px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-cobalt";
+    "mt-1.5 h-[52px] w-full rounded-2xl border border-line bg-black/30 px-4 text-[15px] text-ink placeholder:text-ink-3 focus:border-cobalt";
 
   return (
-    <section className="rounded-xl bg-surface p-4 shadow-card">
+    <section className="rounded-[26px] bg-[linear-gradient(180deg,#171a24,#12141c)] p-5 shadow-card">
       <h2 className="display text-[22px] text-ink">{step === "email" ? "Sign in" : "Enter your code"}</h2>
       {step === "email" ? (
         <form

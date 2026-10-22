@@ -6,20 +6,17 @@ import { join } from "node:path";
  * time (statically generated), so reading font files synchronously is fine.
  */
 export const BRAND = {
-  paper: "#080d19",
-  surface: "#111827",
-  ink: "#f7f7fb",
-  ink2: "#9aa8c4",
-  ink3: "#8593b0",
-  accent: "#ff6b57",
-  coral: "#ff6b57",
-  cobalt: "#477bff",
-  cobaltSoft: "rgba(71,123,255,0.16)",
-  mintInk: "#62e6b5",
-  line: "#27334a",
+  paper: "#07080d",
+  surface: "#161922",
+  ink: "#f4f5f8",
+  ink2: "#a8afbf",
+  ink3: "#8c93a5",
+  accent: "#aeabff",
+  mintInk: "#6fe3b6",
+  line: "rgba(255,255,255,0.1)",
 };
 
-export const ORB_BACKGROUND = "radial-gradient(circle at 32% 22%, #ffa08f 0%, #ff6b57 48%, #e8503c 100%)";
+export const ORB_BACKGROUND = "radial-gradient(circle at 30% 20%, #c9c5ff 0%, #8a80fa 26%, #5b52e4 55%, #3a2fb6 80%, #241c7a 100%)";
 
 export const SHARE_TITLE = "hello: Meet someone interesting.";
 export const SHARE_DESCRIPTION =

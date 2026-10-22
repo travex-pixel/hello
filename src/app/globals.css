@@ -5,44 +5,43 @@
 
 /*
   hello design tokens.
-  Deep midnight navy, one coral for the thing that matters on a screen,
-  electric blue for the person's own voice and for information, mint for
-  "available". Dark only: the product is a quiet evening object, not a
-  dashboard. Every text pairing below meets WCAG AA (see scripts in docs).
+  Near-black ink, frosted glass, pearl-white buttons and one soft iris glow
+  for the thing that matters on a screen. Mint only for "available".
+  Dark only: a quiet evening object, not a dashboard. Every text pairing
+  used meets WCAG AA.
 */
 @theme {
-  --color-bg: #080d19;
-  --color-bg-elevated: #111827;
-  --color-surface: #111827;
-  --color-surface-2: #182236;
-  --color-surface-3: #1f2b42;
-  --color-line: #27334a;
-  --color-line-strong: #36466a;
+  --color-bg: #07080d;
+  --color-bg-elevated: #0f1118;
+  --color-surface: #12141c;
+  --color-surface-2: #1a1d27;
+  --color-surface-3: #242836;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
 
-  --color-ink: #f7f7fb;
-  --color-ink-2: #9aa8c4;
-  --color-ink-3: #8593b0;
-  --color-ink-inverse: #080d19;
+  --color-ink: #f4f5f8;
+  --color-ink-2: #a8afbf;
+  --color-ink-3: #8c93a5;
+  --color-ink-inverse: #0a0b10;
 
-  --color-accent: #ff6b57;
-  --color-accent-strong: #ff8270;
-  --color-accent-deep: #ef5945;
-  --color-accent-soft: rgba(255, 107, 87, 0.14);
-  --color-coral: #ff6b57;
-  --color-coral-light: #ffa08f;
-  --color-accent-glow: rgba(255, 107, 87, 0.45);
+  /* Iris: a soft violet-blue. Used sparingly, for selection and the one glowing button. */
+  --color-accent: #aeabff;
+  --color-accent-strong: #c6c4ff;
+  --color-accent-deep: #6a62ef;
+  --color-accent-soft: rgba(140, 134, 255, 0.15);
+  --color-accent-glow: rgba(106, 98, 239, 0.45);
 
-  --color-cobalt: #477bff;
-  --color-cobalt-deep: #2e5cdc;
-  --color-cobalt-soft: rgba(71, 123, 255, 0.16);
-  --color-cobalt-light: #9ab6ff;
+  --color-cobalt: #6f7cff;
+  --color-cobalt-deep: #4f56e3;
+  --color-cobalt-soft: rgba(111, 124, 255, 0.15);
+  --color-cobalt-light: #b9c0ff;
 
-  --color-mint: rgba(98, 230, 181, 0.16);
-  --color-mint-ink: #62e6b5;
+  --color-mint: rgba(111, 227, 182, 0.14);
+  --color-mint-ink: #6fe3b6;
 
-  --color-success: #62e6b5;
-  --color-warning: #f5b85a;
-  --color-danger: #ff7a7a;
+  --color-success: #6fe3b6;
+  --color-warning: #f2c46d;
+  --color-danger: #ff8080;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
@@ -54,12 +53,11 @@
   --radius-lg: 22px;
   --radius-xl: 28px;
 
-  /* On a dark ground, edges come from a hairline ring, not a drop shadow. */
-  --shadow-soft: 0 0 0 1px #27334a, 0 8px 24px -16px rgba(0, 0, 0, 0.7);
-  --shadow-card: 0 0 0 1px #27334a, 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 24px 60px -36px rgba(0, 0, 0, 0.9);
-  --shadow-sheet: 0 0 0 1px #27334a, 0 -12px 48px -16px rgba(0, 0, 0, 0.8);
-  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 10px 28px -12px rgba(255, 107, 87, 0.6);
-  --shadow-orb: 0 2px 0 rgba(255, 255, 255, 0.28) inset, 0 -14px 36px rgba(176, 52, 34, 0.45) inset, 0 34px 90px -26px rgba(255, 107, 87, 0.7);
+  /* Depth comes from a top highlight, a hairline contour and a long soft shadow. */
+  --shadow-soft: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.07), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.07), 0 2px 4px rgba(0, 0, 0, 0.25), 0 28px 64px -28px rgba(0, 0, 0, 0.9);
+  --shadow-sheet: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.08), 0 -24px 64px -16px rgba(0, 0, 0, 0.9);
+  --shadow-button: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.35), 0 10px 28px -12px rgba(255, 255, 255, 0.28);
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
@@ -67,7 +65,7 @@
   --animate-breathe: breathe 4.2s ease-in-out infinite;
   --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
   --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
-  --animate-spark: spark 3.6s ease-in-out infinite;
+  --animate-sheen: sheen 14s linear infinite;
 
   @keyframes breathe {
     0%,
@@ -95,21 +93,15 @@
   @keyframes pulse-dot {
     0%,
     100% {
-      box-shadow: 0 0 0 0 rgba(98, 230, 181, 0.45);
+      box-shadow: 0 0 0 0 rgba(111, 227, 182, 0.45);
     }
     60% {
-      box-shadow: 0 0 0 6px rgba(98, 230, 181, 0);
+      box-shadow: 0 0 0 6px rgba(111, 227, 182, 0);
     }
   }
-  @keyframes spark {
-    0%,
-    100% {
-      opacity: 0.15;
-      transform: scale(0.6);
-    }
-    50% {
-      opacity: 0.9;
-      transform: scale(1);
+  @keyframes sheen {
+    to {
+      transform: rotate(360deg);
     }
   }
 }
@@ -118,13 +110,13 @@
   color-scheme: dark;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --nav-height: 64px;
+  --nav-height: 60px;
   /* The big button. Shrinks on short viewports so it never pushes the nav off. */
-  --orb: clamp(188px, 56vw, 244px);
+  --orb: clamp(180px, 54vw, 232px);
 }
 @media (max-height: 720px) {
   :root {
-    --orb: clamp(168px, 48vw, 208px);
+    --orb: clamp(164px, 46vw, 200px);
   }
 }
 @media (max-height: 600px) {
@@ -159,16 +151,23 @@ body {
   font-weight: 500;
 }
 
-/* One warm light source behind the button, a cool one low on the left. Fixed so it never shifts under content. */
+/* A quiet aurora: violet light behind the button, cool light at the edges. Fixed so it never shifts. */
 .ambient {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(60% 42% at 50% 34%, rgba(255, 107, 87, 0.16), transparent 70%),
-    radial-gradient(40% 30% at 12% 96%, rgba(71, 123, 255, 0.12), transparent 70%),
-    radial-gradient(30% 24% at 92% 6%, rgba(98, 230, 181, 0.05), transparent 70%);
+    radial-gradient(70% 42% at 50% 40%, rgba(106, 98, 239, 0.16), transparent 70%),
+    radial-gradient(50% 32% at 90% -4%, rgba(120, 170, 255, 0.09), transparent 70%),
+    radial-gradient(45% 30% at 6% 104%, rgba(167, 139, 250, 0.09), transparent 70%);
+}
+
+/* Frosted glass for bars and sheets. */
+.glass {
+  background: linear-gradient(180deg, rgba(30, 33, 45, 0.86), rgba(18, 20, 28, 0.9));
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
 }
 
 *:focus {
@@ -192,7 +191,7 @@ textarea:focus-visible {
 }
 
 ::selection {
-  background: rgba(255, 107, 87, 0.35);
+  background: rgba(140, 134, 255, 0.35);
 }
 
 textarea,

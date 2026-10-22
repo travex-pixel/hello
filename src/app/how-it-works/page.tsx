@@ -6,7 +6,7 @@ export const metadata = { title: "How it works" };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl bg-surface p-4 shadow-card">
+    <section className="rounded-[26px] bg-[linear-gradient(180deg,#171a24,#12141c)] p-5 shadow-card">
       <h2 className="display text-[22px] text-ink">{title}</h2>
       <div className="mt-2 space-y-2 text-sm leading-relaxed text-ink-2">{children}</div>
     </section>

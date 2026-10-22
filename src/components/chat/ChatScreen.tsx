@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
@@ -102,7 +101,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex w-full max-w-md flex-col bg-bg">
-      <header className="flex items-center gap-2 border-b border-line bg-bg/90 px-2 pb-2 pt-[calc(var(--safe-top)+8px)] backdrop-blur-md">
+      <header className="glass flex items-center gap-2 border-b border-line px-2 pb-2 pt-[calc(var(--safe-top)+8px)]">
         <IconButton label="Back" onClick={goBack}>
           <ArrowLeft className="size-5" />
         </IconButton>
@@ -154,7 +153,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
             {startersOpen && (
               <Starters
                 starters={starters}
-                hint={userMessages === 0 ? "Not sure what to say? Tap one, or type anything." : undefined}
+                hint={userMessages === 0 ? "Tap one, or type anything." : undefined}
                 onPick={(s) => {
                   composerRef.current?.setText(s);
                   setStartersOverride(false);
@@ -215,17 +214,12 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
           >
             Delete this chat
           </Button>
-          <p className="mt-1 text-center text-xs text-ink-3">
-            Blocking hides {character.name} from future matches. Reports are stored on this device in the demo.{" "}
-            <Link href="/how-it-works" className="underline-offset-2 hover:underline">
-              Learn more
-            </Link>
-          </p>
+
         </div>
       </Sheet>
 
       <Sheet open={reportOpen} onClose={() => setReportOpen(false)} title="Report this conversation">
-        <p className="mb-3 text-sm text-ink-2">Tell us what went wrong. The conversation will end.</p>
+        <p className="mb-3 text-sm text-ink-3">The conversation will end.</p>
         <div className="flex flex-col gap-2">
           {["Inappropriate or offensive", "Felt unsafe or uncomfortable", "Pretended to be a real person", "Something else"].map((reason) => (
             <Button

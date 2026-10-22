@@ -25,7 +25,7 @@ export function Starters({ starters, onPick, hint }: Props) {
             key={s}
             type="button"
             onClick={() => onPick(s)}
-            className="min-h-[42px] shrink-0 rounded-full border border-line-strong bg-surface-2 px-3.5 py-2 text-sm text-ink-2 transition-colors hover:border-ink-3 hover:text-ink active:bg-surface-3"
+            className="min-h-[42px] shrink-0 rounded-full bg-white/[0.05] px-4 py-2 text-sm text-ink-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] transition-colors hover:bg-white/[0.09] hover:text-ink active:bg-white/[0.03]"
           >
             {s}
           </button>

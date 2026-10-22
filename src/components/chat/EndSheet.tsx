@@ -38,10 +38,10 @@ export function EndSheet({ open, conversationId, characterName, onClose }: Props
   };
 
   return (
-    <Sheet open={open} onClose={onClose} title={done ? "Thanks. What next?" : "How was that hello?"}>
+    <Sheet open={open} onClose={onClose} title={done ? "Thanks. What next?" : `How was ${characterName}?`}>
       {!done ? (
         <div className="flex flex-col gap-2">
-          <p className="mb-1 text-sm text-ink-2">Your conversation with {characterName} has ended. This is optional.</p>
+          <p className="mb-1 text-sm text-ink-3">Optional. Helps us improve.</p>
           {OPTIONS.map((o) => (
             <Button key={o.value} variant="secondary" size="lg" block onClick={() => choose(o.value)}>
               {o.label}
@@ -56,11 +56,8 @@ export function EndSheet({ open, conversationId, characterName, onClose }: Props
           <Button size="lg" block onClick={meetSomeoneElse}>
             Meet someone else
           </Button>
-          <Button variant="secondary" block onClick={() => router.push("/")}>
-            Try a different style
-          </Button>
           <Button variant="ghost" block onClick={() => router.push("/")}>
-            Return home
+            Done
           </Button>
         </div>
       )}

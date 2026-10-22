@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Check } from "lucide-react";
 import type { MatchResult } from "@/lib/matching";
 import { TOPIC_LABELS } from "@/lib/characters/topics";
 import { Avatar } from "@/components/ui/Avatar";
@@ -16,6 +15,7 @@ interface Props {
   onDecline: () => void;
 }
 
+/** One person, one sentence about them, one big button. */
 export function MatchCard({ match, connecting, error, onAccept, onDecline }: Props) {
   const reduce = useReducedMotion();
   const { character, reasons } = match;
@@ -26,57 +26,41 @@ export function MatchCard({ match, connecting, error, onAccept, onDecline }: Pro
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={reduce ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }}
       transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full rounded-xl bg-surface p-4 text-left shadow-card sm:p-5"
+      className="w-full rounded-[30px] bg-[linear-gradient(180deg,#191c27,#12141c)] p-5 text-center shadow-card"
     >
-      <div className="flex items-center gap-3.5">
-        <Avatar name={character.name} hue={character.hue} size="lg" className="size-16 text-[30px] sm:size-20 sm:text-[38px]" />
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h2 className="display text-[30px] leading-none text-ink">{character.name}</h2>
-            <AILabel long />
-          </div>
-          <p className="mt-1.5 text-sm text-ink-2">{character.role}</p>
-        </div>
+      <div className="mx-auto w-fit rounded-full p-1 shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_16px_40px_-12px_rgba(106,98,239,0.55)]">
+        <Avatar name={character.name} hue={character.hue} size="xl" />
+      </div>
+      <h2 className="display mt-4 text-[32px] leading-none text-ink">{character.name}</h2>
+      <div className="mt-2.5 flex items-center justify-center gap-2">
+        <AILabel long />
+        <span className="text-sm text-ink-3">{character.role}</span>
       </div>
 
-      <p className="mt-3.5 text-[15px] leading-snug text-ink-2">{character.bio}</p>
+      <p className="mx-auto mt-4 max-w-[34ch] text-[15px] leading-relaxed text-ink-2">{character.bio}</p>
 
-      <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label="Interests">
-        {character.interests.slice(0, 4).map((t) => (
-          <li key={t} className="rounded-full border border-line bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-ink-2">
+      {reasons.length > 0 && <p className="mt-3 text-sm font-medium text-accent">{reasons[0]}</p>}
+
+      <ul className="mt-4 flex flex-wrap justify-center gap-1.5" aria-label="Interests">
+        {character.interests.slice(0, 3).map((t) => (
+          <li key={t} className="rounded-full bg-white/[0.05] px-3 py-1 text-xs font-medium text-ink-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
             {TOPIC_LABELS[t]}
           </li>
         ))}
       </ul>
 
-      <div className="mt-3 rounded-md border-l-[3px] border-coral bg-accent-soft px-3 py-2.5">
-        <p className="text-sm leading-snug text-ink">{character.whyInteresting}</p>
-        {reasons.length > 0 && (
-          <ul className="mt-1.5 space-y-1">
-            {reasons.map((r) => (
-              <li key={r} className="flex items-center gap-2 text-xs text-ink-2">
-                <Check className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
-                {r}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <p className="mt-2.5 text-xs leading-snug text-ink-3">An AI character, not a real person. Replies are generated for this demo and stay on your device.</p>
-
       {error && (
-        <p role="status" className="mt-2.5 text-sm font-medium text-warning">
+        <p role="status" className="mt-4 text-sm font-medium text-warning">
           {error}
         </p>
       )}
 
-      <div className="mt-3.5 flex flex-col gap-1.5">
-        <Button size="lg" block loading={connecting} onClick={onAccept} icon={<ArrowRight className="size-5" strokeWidth={2.4} aria-hidden="true" />}>
-          {connecting ? "Opening the chat" : "Start the conversation"}
+      <div className="mt-6 flex flex-col gap-1">
+        <Button size="lg" block loading={connecting} onClick={onAccept}>
+          {connecting ? "Opening" : "Start chatting"}
         </Button>
         <Button variant="ghost" block disabled={connecting} onClick={onDecline}>
-          Try someone else
+          Someone else
         </Button>
       </div>
     </motion.section>

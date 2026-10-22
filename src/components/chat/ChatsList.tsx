@@ -45,7 +45,7 @@ export function ChatsList() {
           <ul className="-mx-2 mt-1 flex flex-col">
             {mates.map((c) => (
               <li key={c.id}>
-                <Link href={`/people/chat/${c.id}`} className="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-surface-2 active:bg-surface-3">
+                <Link href={`/people/chat/${c.id}`} className="flex items-center gap-3 rounded-2xl px-2 py-3 transition-colors hover:bg-white/[0.05] active:bg-white/[0.03]">
                   <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-mint text-mint-ink">
                     <UserRound className="size-5" aria-hidden="true" />
                   </span>
@@ -72,9 +72,9 @@ export function ChatsList() {
 
       {!hydrated ? null : items.length === 0 ? (
         <div className="mt-10 flex flex-1 flex-col items-center justify-start text-center">
-          <div className="w-full rounded-xl bg-surface p-6 shadow-card">
+          <div className="w-full rounded-[26px] bg-[linear-gradient(180deg,#171a24,#12141c)] p-6 shadow-card">
             <h2 className="display text-[26px] text-ink">No conversations yet</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-2">Pick a mood on Discover and start a conversation. It takes one tap.</p>
+            <p className="mt-2 text-sm text-ink-3">Your conversations will appear here.</p>
             <Button className="mt-4" block onClick={() => router.push("/")}>
               Start a conversation
             </Button>
@@ -90,7 +90,7 @@ export function ChatsList() {
               <li key={c.id}>
                 <Link
                   href={`/chat/${c.id}`}
-                  className="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-surface-2 active:bg-surface-3"
+                  className="flex items-center gap-3 rounded-2xl px-2 py-3 transition-colors hover:bg-white/[0.05] active:bg-white/[0.03]"
                 >
                   <Avatar name={character.name} hue={character.hue} size="md" />
                   <div className="min-w-0 flex-1">

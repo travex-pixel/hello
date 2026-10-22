@@ -26,8 +26,8 @@ export function MessageBubble({ message, onRetry }: Props) {
     >
       <div
         className={cn(
-          "max-w-[82%] whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2.5 text-[15px] leading-relaxed",
-          mine ? "rounded-br-[6px] bg-cobalt-deep text-white" : "rounded-bl-[6px] border border-line bg-surface text-ink",
+          "max-w-[82%] whitespace-pre-wrap break-words rounded-[20px] px-4 py-2.5 text-[16px] leading-relaxed",
+          mine ? "rounded-br-[6px] bg-[linear-gradient(180deg,#5d63ee,#4a50de)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_6px_16px_-8px_rgba(79,86,227,0.7)]" : "rounded-bl-[6px] bg-surface-2 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_0_1px_rgba(255,255,255,0.06)]",
           (message.status === "failed" || message.status === "sending") && "opacity-70",
         )}
       >
