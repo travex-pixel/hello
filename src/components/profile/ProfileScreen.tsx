@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { useHello } from "@/lib/conversation/store";
-import { AI_MODE } from "@/lib/ai";
+import { useModelStatus } from "@/lib/ai/useModelStatus";
+import { MemoryCard } from "./MemoryCard";
+import { StyleCard } from "./StyleCard";
 import { PICKABLE_TOPICS, TOPIC_LABELS, type TopicId } from "@/lib/characters/topics";
 import { getCharacter } from "@/lib/characters";
 import type { DepthPreference, VibePreference } from "@/lib/matching";
@@ -57,6 +59,7 @@ export function ProfileScreen() {
   const clearHistory = useHello((s) => s.clearHistory);
   const conversationCount = useHello((s) => s.order.length);
   const [confirmClear, setConfirmClear] = useState(false);
+  const engine = useModelStatus();
 
   const toggleTopic = (t: TopicId) => {
     const topics = preferences.topics.includes(t) ? preferences.topics.filter((x) => x !== t) : [...preferences.topics, t];
@@ -122,6 +125,10 @@ export function ProfileScreen() {
             />
           </Card>
 
+          <StyleCard Card={Card} />
+
+          <MemoryCard Card={Card} />
+
           <Card title="Mates">
             <p className="text-sm text-ink-3">Real people, invite-only.</p>
             <Link href="/people" className="flex min-h-[52px] items-center justify-between rounded-2xl bg-white/[0.05] px-4 text-[15px] font-semibold text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] transition-colors hover:bg-white/[0.08]">
@@ -133,7 +140,7 @@ export function ProfileScreen() {
           <Card title="Demo">
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
               <dt className="text-ink-3">Replies</dt>
-              <dd className="text-ink">{AI_MODE === "server" ? "Server model, falls back to local engine" : "Local engine, on your device"}</dd>
+              <dd className="text-ink">{engine === null ? "Checking…" : engine === "model" ? "Language model (Anthropic), via HELLO's server" : "Local engine, on your device"}</dd>
               <dt className="text-ink-3">Conversations</dt>
               <dd className="text-ink">{conversationCount}</dd>
             </dl>
@@ -161,7 +168,7 @@ export function ProfileScreen() {
       )}
 
       <Sheet open={confirmClear} onClose={() => setConfirmClear(false)} title="Clear demo history?">
-        <p className="text-sm text-ink-2">This deletes every conversation, report and local usage event on this device. Your preferences stay.</p>
+        <p className="text-sm text-ink-2">This deletes every conversation, report, saved memory and local usage event on this device. Your preferences stay.</p>
         <div className="mt-4 flex flex-col gap-2">
           <Button
             variant="danger"

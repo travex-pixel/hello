@@ -44,6 +44,8 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
   const character = conversation ? getCharacter(conversation.characterId) : undefined;
   const messageCount = conversation?.messages.length ?? 0;
   const userMessages = conversation?.messages.filter((m) => m.role === "user").length ?? 0;
+  // The character always speaks first; sending before that would cut their opening off.
+  const awaitingOpening = !!conversation && !conversation.messages.some((m) => m.role === "character");
 
   // Starters show until the first message, unless the user toggles them.
   const startersOpen = startersOverride ?? userMessages === 0;
@@ -166,7 +168,8 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
             onSend={(t) => void sendMessage(conversationId, t)}
             onToggleStarters={() => setStartersOverride(!startersOpen)}
             startersOpen={startersOpen}
-            placeholder={`Message ${character.name}`}
+            placeholder={awaitingOpening ? `${character.name} is saying hello…` : `Message ${character.name}`}
+            disabled={awaitingOpening && typing}
           />
         </>
       )}

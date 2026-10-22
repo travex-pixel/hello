@@ -6,8 +6,16 @@ import type { Rng } from "@/lib/utils/rng";
 export type DepthPreference = "quick" | "deeper" | "either";
 export type VibePreference = "funny" | "thoughtful" | "outgoing" | "any";
 
+export interface TextingStyle {
+  /** "Make it more like me": how they describe their own texting. */
+  about?: string;
+  /** Up to three messages they'd actually send. */
+  examples?: string[];
+}
+
 export interface Preferences {
   displayName?: string;
+  style?: TextingStyle;
   topics: TopicId[];
   depth: DepthPreference;
   vibe: VibePreference;

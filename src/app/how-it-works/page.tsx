@@ -40,10 +40,14 @@ export default function HowItWorksPage() {
       <Section title="The AI demo">
         <p>
           Today you meet AI characters. Each one is labelled <strong className="text-ink">AI</strong> wherever they appear, will say so if you ask,
-          and never claims to be a person. Their replies come from a local engine on your device by default, so nothing is sent anywhere and no
-          account or API key is needed.
+          and never claims to be a person. When HELLO has a language model switched on, your messages to a character are sent through HELLO&rsquo;s
+          server to Anthropic, which writes the reply; HELLO&rsquo;s server doesn&rsquo;t keep them. Otherwise a simple engine in your browser
+          replies and nothing is sent anywhere.
         </p>
-        <p>They remember what you tell them within a conversation (your name, what you like) and forget it when you clear your history.</p>
+        <p>
+          Characters remember the conversation you&rsquo;re in. If you allow it, they also remember a few things across chats, like your name or
+          your dog&rsquo;s name. You can see, edit and delete those in Profile, under What hello remembers.
+        </p>
       </Section>
 
       <Section title="Real people">

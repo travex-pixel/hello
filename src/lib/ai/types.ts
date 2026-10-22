@@ -1,35 +1,35 @@
 import type { Character, Mode } from "@/lib/characters/types";
 import type { Memory } from "@/lib/engine/memory";
+import type { ChatContext, HistoryTurn } from "./prompt";
+import type { ChatUsage } from "./protocol";
 
-export interface HistoryItem {
-  role: "user" | "character";
-  text: string;
-}
-
-export interface ReplyRequest {
+export interface TurnRequest {
   character: Character;
   mode: Mode;
+  kind: "opening" | "reply";
+  /** Oldest first, user and character turns only. For a reply it ends with the user's latest message(s). */
+  history: HistoryTurn[];
+  /** The local engine's per-conversation memory. */
   memory: Memory;
-  /** Oldest first, user and character turns only. */
-  history: HistoryItem[];
-  userMessage: string;
+  context: ChatContext;
+  /** Stable per conversation. */
+  seed?: number;
+  signal?: AbortSignal;
+  /** Called once per message bubble, as soon as it's ready. */
+  onBubble: (text: string) => void;
 }
 
-export interface OpeningRequest {
-  character: Character;
-  mode: Mode;
+export interface TurnResult {
   memory: Memory;
+  source: "local" | "model";
+  firstMs?: number | null;
+  totalMs?: number;
+  usage?: ChatUsage;
 }
 
-export interface ReplyResult {
-  messages: string[];
-  memory: Memory;
-  /** Where the words came from. Shown nowhere, logged in dev. */
-  source: "local" | "server";
+export interface ConversationEngine {
+  readonly name: "local" | "model";
+  turn(req: TurnRequest): Promise<TurnResult>;
 }
 
-export interface AiProvider {
-  readonly name: string;
-  opening(req: OpeningRequest): Promise<ReplyResult>;
-  reply(req: ReplyRequest): Promise<ReplyResult>;
-}
+export type { HistoryTurn };

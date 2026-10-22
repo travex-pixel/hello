@@ -4,20 +4,22 @@ HELLO ships with eight AI conversation partners so the product can be tried
 before any real people are in it. This document explains what generates their
 replies and what the system does and does not do.
 
-## Two providers
+## Two engines
 
-| | Local engine (default) | Server model (optional) |
+| | Local engine | Language model |
 |---|---|---|
-| Where it runs | In the browser | On the server via `/api/chat` |
-| Credentials | None | `HELLO_AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` |
-| Cost | Free | Per-token API usage |
-| Quality | Scripted but contextual | Open-ended language model |
-| Failure mode | None (pure functions) | Falls back to the local engine |
+| Where it runs | In the browser | On the server via `/api/chat`, streaming |
+| Credentials | None | `ANTHROPIC_API_KEY` (server only) |
+| Cost | Free | Per-token API usage (see AI_CONVERSATION.md) |
+| Quality | Scripted, keyword-driven | Open-ended, in-character |
+| Failure mode | None (pure functions) | Shown honestly: "No reply. Tap to retry" |
 
-The browser picks the server provider only when `NEXT_PUBLIC_HELLO_AI_MODE=server`.
-Even then, the local engine runs on every turn to keep session memory in sync,
-and its reply is used whenever the server is not configured, times out, rate
-limits, errors, or the model declines.
+The browser asks `GET /api/chat` whether a model is configured and uses it
+when it is. `NEXT_PUBLIC_HELLO_AI_MODE=local` forces the local engine. A model
+failure is never replaced by a scripted reply; the one exception is a failed
+opening line, where the character's own authored first line is used so the
+chat can start. See [AI_CONVERSATION.md](AI_CONVERSATION.md) for the model
+path, memory and tests.
 
 ## The local engine is not random
 

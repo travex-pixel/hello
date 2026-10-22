@@ -103,6 +103,26 @@ export function useDiscovery() {
     }
   }, [state, mode, startConversation, router]);
 
+  /** Skip matching: start straight away with a character the person picked. */
+  const startWith = useCallback(
+    async (characterId: string) => {
+      if (busyRef.current) return;
+      setError(null);
+      track("connection_accepted", { mode, characterId, reason: "picked" });
+      try {
+        const id = await startConversation(characterId, mode);
+        track("conversation_started", { mode, characterId, conversationId: id, source: "ai" });
+        router.push(`/chat/${id}`);
+        declinedRef.current = [];
+        setState({ status: "idle" });
+      } catch {
+        track("conversation_start_failed", { mode, characterId, source: "ai", reason: "open_failed" });
+        setError(START_FAILED_MESSAGE);
+      }
+    },
+    [mode, startConversation, router],
+  );
+
   const reset = useCallback(() => {
     runRef.current += 1;
     busyRef.current = false;
@@ -126,5 +146,5 @@ export function useDiscovery() {
     window.setTimeout(() => void startRef.current(), 0);
   }, [autoStart, setAutoStart, mode]);
 
-  return { state, error, start, tryAnother, accept, reset };
+  return { state, error, start, tryAnother, accept, startWith, reset };
 }

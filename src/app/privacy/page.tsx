@@ -62,7 +62,10 @@ export default function PrivacyPage() {
       <Section title="Where it's kept">
         <p>
           Accounts and messages are stored in a Supabase database run by the beta owner. Sign-in codes are sent by email. The website is hosted on Vercel, which also
-          counts anonymous page visits without cookies. Chats with AI characters stay on your device and are not stored on the server.
+          counts anonymous page visits without cookies. Chats with AI characters, and anything listed under What hello remembers, are saved on your device, not on HELLO&rsquo;s server. When
+          model replies are switched on, each message you send to a character goes, with the recent conversation and those remembered notes,
+          through HELLO&rsquo;s server to Anthropic to write the reply. HELLO doesn&rsquo;t store it; Anthropic handles API data under its own
+          commercial terms.
         </p>
       </Section>
 

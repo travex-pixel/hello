@@ -1,11 +1,17 @@
-import { localProvider } from "./local";
-import { serverProvider } from "./server";
-import type { AiProvider } from "./types";
+import { localEngine } from "./local";
+import { modelAvailable, modelEngine } from "./client";
+import type { ConversationEngine } from "./types";
 
-export const AI_MODE = process.env.NEXT_PUBLIC_HELLO_AI_MODE === "server" ? "server" : "local";
-
-export function getProvider(): AiProvider {
-  return AI_MODE === "server" ? serverProvider : localProvider;
+/**
+ * The model when the server has one configured, the local engine when it
+ * definitely doesn't. If the check itself failed, try the model: its reply
+ * route answers "not_configured" or fails honestly, and never quietly
+ * downgrades a conversation to scripted lines.
+ */
+export async function getEngine(): Promise<ConversationEngine> {
+  return (await modelAvailable()) === false ? localEngine : modelEngine;
 }
 
-export type { AiProvider, ReplyRequest, ReplyResult, HistoryItem } from "./types";
+export { localEngine };
+export { ChatError, setModelAvailable } from "./client";
+export type { ConversationEngine, TurnRequest, TurnResult, HistoryTurn } from "./types";

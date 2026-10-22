@@ -8,7 +8,7 @@ export const GENERIC = {
   niceToMeet: ["Nice to meet you, {name}!", "{name}, good to meet you!", "Hi {name}!"],
   /** Acknowledging a short answer to a question we asked. {echo} is the user's words. */
   echoAck: ["{echo}, noted!", "{echo}. Good answer.", "{echo}, nice.", "{echo}. I can work with that."],
-  ack: ["Got it.", "Makes sense.", "Fair enough.", "I like that.", "Okay, interesting."],
+  ack: ["Ha, okay.", "Love that.", "Can't argue with that.", "Respect.", "Okay, I'm into that."],
   /** For non-answers like "idk" or "ok": accept and move on, no fuss. */
   shrugAck: ["Fair.", "No worries.", "That's fine.", "All good."],
   /** User says they're tired. Kind, brief, no advice. */

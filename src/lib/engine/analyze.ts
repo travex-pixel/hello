@@ -90,11 +90,11 @@ const RX = {
   story_request: /\b(tell me (a |something )?(story|about your day)|entertain me|say something|talk to me|go on then)\b/i,
   thanks: /\b(thanks|thank you|thx|ty|cheers|appreciate (it|that))\b/i,
   boundary: /\b(your (number|phone|address|instagram|insta|snap|snapchat|whatsapp|socials)|where do you live|send (me )?(a )?(pic|photo|picture|selfie|nude)|meet up|meet in person|are you single|date me|be my girlfriend|be my boyfriend|what are you wearing)\b/i,
-  sensitive: /\b(kill myself|suicide|suicidal|end my life|self harm|self-harm|hurt myself|want to die|don(?:'| )?t want to (be here|live)|no reason to live)\b/i,
+  sensitive: /\b(kill(?:ing)? myself|suicid\w*|end(?:ing)? (?:my|it all|my own) life|end it all|take my (?:own )?life|self[- ]?harm\w*|hurt(?:ing)? myself|cut(?:ting)? myself|want(?:ed)? to die|wanna die|don(?:'| )?t want to (be here|be alive|live|wake up)|no reason to live|better off without me|better off dead)\b/i,
   meta: /\b(this app|hello app|how does this (work|app work)|what is this|is this app|who built this|what is hello)\b/i,
   tired: /\b(tired|exhausted|knackered|shattered|sleepy|drained|wiped out|worn out|long day)\b/i,
   place: /\b(?:[Ii](?:'| a)m from|[Ii] live in|[Ii](?:'| a)m based in|[Ii](?:'| a)m (?:currently |originally )?in)\s+([A-Z][A-Za-z.' -]{1,30}?)(?=\s+(?:actually|though|btw|at the moment|right now|these days|currently|originally|lol|haha)|[.,!?;]|$)/,
-  name_intro: /\b(?:[Mm]y name(?:'s| is)|[Cc]all me|[Ii](?:'| a)m|[Tt]his is)\s+([A-Z][a-z]{1,15})\b(?!\s+(?:bored|tired|fine|good|ok|okay|here|not|from|just|so|really|very|a|an|the|in|at|on|going|doing|feeling|thinking|trying|looking|new|back|down|up|sorry|happy|sad|busy|free|done|sure|glad|all|still|kind|pretty))/,
+  name_intro: /\b(?:[Mm]y name(?:'s| is)|[Cc]all me|[Ii](?:'| a)m|[Tt]his is)\s+([A-Z][a-z]{1,15})\b(?!\s+(?:bored|tired|fine|good|ok|okay|here|not|from|just|so|really|very|a|an|the|in|at|on|going|doing|feeling|thinking|trying|looking|new|back|down|up|sorry|happy|sad|busy|free|done|sure|glad|all|still|kind|pretty)\b)/,
   self_fact: /\b(i(?:'| a)m from ([^.,!?;]+)|i live in ([^.,!?;]+)|i work (?:as|at|in) ([^.,!?;]+)|i(?:'| a)m a (?:student|nurse|teacher|developer|designer|writer|engineer|doctor|chef|lawyer|musician|artist|programmer|barista|driver|builder|accountant|pilot|scientist|photographer)[^.,!?;]*|i study ([^.,!?;]+)|i(?:'| a)m studying ([^.,!?;]+)|i play ([^.,!?;]+)|i(?:'| a)m learning ([^.,!?;]+)|my (dog|cat|sister|brother|mum|mom|dad|job|band)[^.,!?;]*)/i,
   question_start: /^(what|why|how|when|where|who|which|do|does|did|can|could|would|should|have|has|is|are|am|will|any|ever)\b/i,
 };

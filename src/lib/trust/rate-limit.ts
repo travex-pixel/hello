@@ -11,9 +11,16 @@ export interface RateLimiter {
 
 export function createRateLimiter(limit: number, windowMs: number): RateLimiter {
   const hits = new Map<string, number[]>();
+  let lastSweep = 0;
   const prune = (key: string, now: number) => {
+    // Occasionally drop keys with no recent hits, so many distinct keys can't grow memory forever.
+    if (now - lastSweep > windowMs) {
+      lastSweep = now;
+      for (const [k, times] of hits) if (!times.some((t) => now - t < windowMs)) hits.delete(k);
+    }
     const list = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
-    hits.set(key, list);
+    if (list.length) hits.set(key, list);
+    else hits.delete(key);
     return list;
   };
   return {
@@ -21,6 +28,7 @@ export function createRateLimiter(limit: number, windowMs: number): RateLimiter 
       const list = prune(key, now);
       if (list.length >= limit) return false;
       list.push(now);
+      hits.set(key, list);
       return true;
     },
     retryAfterMs(key, now = Date.now()) {

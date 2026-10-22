@@ -45,3 +45,4 @@ transcript.txt
 
 # keep the documented example env file
 !.env.example
+eval-out/

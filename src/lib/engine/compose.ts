@@ -205,7 +205,8 @@ function modeQuestion(ctx: Ctx): { text: string | undefined; move: MoveType; top
 }
 
 function questionRate(ctx: Ctx): number {
-  const base = ctx.character.voice.style.questionRate;
+  // Tuned down: replies that always end in a question read like an interview.
+  const base = ctx.character.voice.style.questionRate * 0.7;
   if (ctx.mode === "warmup") return Math.max(base, 0.85);
   if (ctx.mode === "surprise") return Math.min(1, base + 0.1);
   return base;
@@ -472,9 +473,9 @@ function plan(ctx: Ctx, a: Analysis): Plan {
         ? pick(ctx, GENERIC.shrugAck)
         : ctx.mode === "warmup"
           ? pick(ctx, GENERIC.warmAck)
-          : echo.length <= 24
-            ? pick(ctx, GENERIC.echoAck, { echo: echo.charAt(0).toUpperCase() + echo.slice(1) })
-            : pick(ctx, GENERIC.ack);
+          : // Never parrot their words back; a short reaction reads more like a person.
+            pick(ctx, GENERIC.ack);
+      void echo;
       if (ack) segments.push(ack);
       if (!nonAnswer && last.topic && v.topics[last.topic] && hasUnused(ctx, v.topics[last.topic]?.share)) {
         const follow = topicShareAndAsk(ctx, last.topic);
@@ -575,7 +576,7 @@ function finish(ctx: Ctx, p: Plan): ReplyOutput {
 
   // Optional trailing question, rate-limited so not every reply ends with one.
   if (!asked && !p.closed) {
-    const forced = memory.repliesWithoutQuestion >= 2;
+    const forced = memory.repliesWithoutQuestion >= 3;
     const tooMany = memory.questionStreak >= 3 && chance(ctx.rng, 0.6);
     if (forced || (!tooMany && chance(ctx.rng, questionRate(ctx)))) {
       const q = modeQuestion(ctx);

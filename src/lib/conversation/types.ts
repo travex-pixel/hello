@@ -9,6 +9,10 @@ export interface Message {
   text: string;
   ts: number;
   status?: "sending" | "sent" | "failed";
+  /** A system message HELLO adds itself, shown as a card (crisis resources). */
+  kind?: "safety";
+  /** For an AI chat: the reply to this message failed. */
+  replyFailed?: boolean;
 }
 
 export interface Conversation {
@@ -21,6 +25,12 @@ export interface Conversation {
   endedAt?: number;
   messages: Message[];
   memory: Memory;
+  /** Short notes picked up in this conversation, sent with each request. */
+  notes?: string[];
+  /** Stable per conversation; varies the character's opinions and opening. */
+  seed?: number;
+  /** Which engine wrote the replies. */
+  engine?: "model" | "local";
   feedback?: Feedback;
   /** Milestones already tracked, so analytics events fire once. */
   milestones: { firstMessage?: boolean; firstResponse?: boolean; reachedFive?: boolean };

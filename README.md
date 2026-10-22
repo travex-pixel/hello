@@ -15,8 +15,9 @@ npm run dev
 ```
 
 Open http://localhost:3000 on a phone-sized viewport. No account, API key or
-environment variable is needed: the AI characters run on a local engine in the
-browser and your conversations stay on your device.
+environment variable is needed: without a model key the AI characters run on a
+local engine in the browser. Add `ANTHROPIC_API_KEY` for model-written replies
+(see [docs/AI_CONVERSATION.md](docs/AI_CONVERSATION.md)).
 
 ## What's in the box
 
@@ -84,16 +85,19 @@ No message contents and no personal information are recorded.
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript |
 | `npm test` | Vitest: engine, matching, analytics, network rules, and the mates service on memory and PGlite (add `TEST_DATABASE_URL` for real Postgres) |
+| `npm run eval` | Conversation scenarios: `HELLO_EVAL=local` or `HELLO_EVAL=model` (needs a key); writes `eval-out/` |
 | `npm run transcript` | Writes sample conversations for every character and mode to `transcript.txt` |
 
 ## Optional configuration
 
 Copy `.env.example` to `.env.local` and uncomment what you need.
 
-- **Model-backed replies.** Set `HELLO_AI_PROVIDER=anthropic`,
-  `ANTHROPIC_API_KEY` and `NEXT_PUBLIC_HELLO_AI_MODE=server`. The browser calls
-  `/api/chat`; the key never leaves the server; any failure falls back to the
-  local engine.
+- **Model-written replies.** Set `ANTHROPIC_API_KEY` (server only). The
+  default model is Claude Haiku 5.5; `HELLO_AI_MODEL` switches it. The browser
+  asks `/api/chat` whether a model is configured and streams replies through
+  it; the key never leaves the server. Failures are shown as "No reply. Tap to
+  retry", never swapped for scripted lines. Details, costs and the test suite:
+  [docs/AI_CONVERSATION.md](docs/AI_CONVERSATION.md).
 - **Mates beta.** Set `HELLO_HUMAN_MODE=supabase` plus four Supabase values.
   Step-by-step setup, including the free email sender and how to review
   reports, is in [docs/HUMAN_MODE.md](docs/HUMAN_MODE.md).
@@ -106,7 +110,9 @@ src/components          UI: shell, primitives, discover, chat, profile, people
 src/lib/characters      the eight characters and the topic lexicon
 src/lib/engine          local conversation engine: analysis, memory, composer
 src/lib/matching        explainable character matching for the three modes
-src/lib/ai              provider interface, local provider, server adapter, persona prompt
+src/lib/ai              personas, prompt, streaming client, server handler (src/lib/ai/server)
+src/lib/memory          durable notes: extraction, merging, what goes to the model
+src/lib/eval            conversation scenarios, metrics, eval runner
 src/lib/conversation    persisted store for demo conversations
 src/lib/analytics       event names, local tracking, funnel computation
 src/lib/network         real-people domain: graph, eligibility, invites, requests

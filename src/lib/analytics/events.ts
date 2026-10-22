@@ -10,6 +10,8 @@ export type EventName =
   | "discovery_tapped"
   | "conversation_started"
   | "conversation_start_failed"
+  | "reply_timing"
+  | "ai_reply_failed"
   | "character_presented"
   | "connection_accepted"
   | "connection_declined"
@@ -36,6 +38,10 @@ export type EventProps = Partial<{
   daysSinceLastVisit: number;
   /** A short category, never free text or message content. */
   reason: string;
+  engine: "model" | "local";
+  msToFirstBubble: number;
+  msToComplete: number;
+  modelFirstMs: number;
 }>;
 
 export interface AnalyticsEvent {

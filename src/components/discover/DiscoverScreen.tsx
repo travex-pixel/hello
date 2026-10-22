@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { ConnectButton } from "./ConnectButton";
 import { MatchCard } from "./MatchCard";
+import { CharacterPicker } from "./CharacterPicker";
 import { ModeSelector } from "./ModeSelector";
 import { useDiscovery } from "./useDiscovery";
 import { MatePanel } from "./MatePanel";
@@ -30,7 +31,8 @@ export function DiscoverScreen() {
   const setMode = useHello((s) => s.setMode);
   const blocked = useHello((s) => s.blockedCharacterIds);
   const unblock = useHello((s) => s.unblockCharacter);
-  const { state, error, start, tryAnother, accept, reset } = useDiscovery();
+  const { state, error, start, tryAnother, accept, startWith, reset } = useDiscovery();
+  const [picking, setPicking] = useState(false);
   const router = useRouter();
   const mate = useMateMatch(mode);
   const [people, setPeople] = useState<StatusView | null>(null);
@@ -159,7 +161,7 @@ export function DiscoverScreen() {
 
           {(state.status === "found" || state.status === "connecting") && (
             <motion.div key="match" {...fade} className="w-full">
-              <MatchCard match={state.match} connecting={state.status === "connecting"} error={error} onAccept={() => void accept()} onDecline={tryAnother} />
+              <MatchCard match={state.match} connecting={state.status === "connecting"} error={error} onAccept={() => void accept()} onDecline={tryAnother} onChoose={() => setPicking(true)} />
             </motion.div>
           )}
 
@@ -185,6 +187,15 @@ export function DiscoverScreen() {
           )}
         </AnimatePresence>
       </section>
+
+      <CharacterPicker
+        open={picking}
+        onClose={() => setPicking(false)}
+        onPick={(id) => {
+          setPicking(false);
+          void startWith(id);
+        }}
+      />
 
       <footer className="pb-3 text-center text-[13px] text-ink-3 short:hidden">
         <p className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1">

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "transcript": "TRANSCRIPT=1 TRANSCRIPT_OUT=transcript.txt vitest run src/lib/engine/compose.test.ts"
+    "transcript": "TRANSCRIPT=1 TRANSCRIPT_OUT=transcript.txt vitest run src/lib/engine/compose.test.ts",
+    "eval": "vitest run src/lib/eval/run.eval.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
